@@ -19,4 +19,7 @@ F3 <- data.matrix(Floor3)
 F1Graph <- graph_from_adjacency_matrix(F1)
 F2Graph <- graph_from_adjacency_matrix(F2)
 F3Graph <- graph_from_adjacency_matrix(F3)
-F1nodeatt <- c(-50,-50,-50,-50,0,0,15,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0)
+
+#read in attractivenesses
+F1att <- read_xlsx("network node codebook.xlsx", 1)
+F1nodeatt = as.list(att[3])[[1]]  #list of node attractivenesses

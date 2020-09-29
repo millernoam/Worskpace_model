@@ -110,33 +110,54 @@ initialize <- function(){
   agentstates <<- c()   #list of current state of each agent
   nodeloci <<- c()     #list of current position for each agent
   telapsed <<- c()    #list of time elapsed for each agent
-  workstation <<- sample(ws,numagents,replace=T)  #work pos for each agent
+  workstation <<- sample(ws_spots,numagents,replace=T)  #work pos for each agent
   personality <<- list()  #personality of each agent
-  bladder <<- list()  #current bladder state of each agent
-  hunger <<- list()   #current hunger level of each agent
-  social <<- list()   #current social level of each agent
+  curbladder <<- list()  #current bladder state of each agent
+  curhunger <<- list()   #current hunger level of each agent
   thistory <<- list()  #history of telapsed
   blanklist = list(0)  #a blank list
   for(i in 1:(numagents)){   # iterate over agents
     agentpaths <<- append(agentpaths, blanklist)  #no current path
     agentstates <<- c(agentstates, 0)  #state = 0
     telapsed <<- c(telapsed, 0)  #tealpsed = 0
-    bladder <<- c(bladder, 0)  #bladder empty
-    hunger <<- c(hunger, 0)    #not hungry
-    foodiness <- rnorm(1, mean = foodmean, sd = foodsd)          #personality: foodiness, social, work ethic, bladder_cap
-    social <- rnorm(1, mean = socmean, sd = socsd)
-    workethic <- rnorm(1, mean = workmean, sd = worksd)
-    bladsize <- rnorm(1, mean = bladmean, sd = bladsd)
-    traits <- c(foodiness, social, workethic, bladsize)
+    curbladder <<- c(curbladder, 0)  #bladder empty
+    curhunger <<- c(curhunger, 0)    #not hungry
+    foodiness <- rnorm(1, mean = foodpersmean, sd = foodperssd)  #personality: foodiness, social, work ethic, bladder_cap
+    sociability <- rnorm(1, mean = socpersmean, sd = socperssd)
+    workethic <- rnorm(1, mean = workpersmean, sd = workperssd)
+    bladsize <- rnorm(1, mean = bladpersmean, sd = bladperssd)
+    traits <- c(foodiness, sociability, workethic, bladsize)
     mylist <- list(traits)
     personality[length(personality)+1] <<- mylist
-    nodeloci <<- c(nodeloci, sample(1:4,1))  # start with people being outside (nodeloci < 4)
+    nodeloci <<- c(nodeloci, sample(out_spots,1))  # start with people outside
   }
   statehistory <<- c()
   nodehistory <<- c()
   statehistory[length(statehistory)+1] <<- list(agentstates) # the last state agent was in is their current state
   nodehistory[length(nodehistory)+1] <<- list(nodeloci)    # the last node agent was in is their current location
   thistory[length(thistory)+1] <<- list(telapsed)
+}
+
+dosr <- function(){  #update social dynamics
+  for(a in 1:numagents){
+    
+    if(nodeloci[[a]] %in% sr_spots && agentstates[[a]] == 2){       #if agent is in an sr_spot
+      fellows <- which(nodeloci == nodeloci[[a]])                   #who else is there?
+      if(length(fellows) == 0){
+        agentstates[[a]] = 2
+      } else {                                      #if there is anyone else there
+        localchatters <- which(agentstates[fellows] == 4)           #are those people socialising?
+        if(length(localchatters == 0)){             #if nobody is socializing
+          
+        } else {     #others in same space, but not socializing
+          
+        }
+        
+      }
+    }
+    
+  }
+  
 }
 
 makeprobs <- function(time, tspent, person, blad, hung){
