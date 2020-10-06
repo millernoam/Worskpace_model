@@ -1,8 +1,15 @@
+#This script runs the main parts of the model
+
 #States: 0 = Working, 1=Eating; 2=Relax, 3=Washroom, 4=Socialize, -10=walking
 #Nodes: ws_spots = working, sr_spots = social/relax
 #Personality: Hunger, Sociability, Work Ethic, Bladder_cap
 
-`%notin%` <- Negate(`%in%`)
+
+#function to find absence of an item from a list
+`%notin%` <- Negate(`%in%`)  
+
+
+#User-defined parameters------------------------------------------
 
 ws_spots = c(7,17,28,24)  #list of workstations
 sr_spots = c(6,14,35)    #socializing/relaxing spots
@@ -12,7 +19,7 @@ out_spots = c(1,2,3,4)   #outside spots
 
 numagents = 10      #number of agents
 total_time = 500    #length of the day
-num_days = 25       #number of days to run
+num_days = 1       #number of days to run
 
 foodpersmean = 10     #means and SDs of personality distributions
 foodperssd = 6
@@ -33,7 +40,7 @@ initialize()
 # run the model -------------------------------
 for (d in 1:num_days){            #iterate over days
   
-  #things remembered across days...!!!!!!!!!!!!!!!!!!!!!!!!
+  #things remembered across days go here !!!!!!!!!!!!!!!!!!!!
   
   for (t in 1:total_time){         # iterate over the day
     
@@ -41,8 +48,9 @@ for (d in 1:num_days){            #iterate over days
     
     for (a in 1:numagents){        # iterate over agents
       
-      curhunger[[a]] = curhunger[[a]] + runif(1)  #get hungrier
+      curhunger[[a]] = curhunger[[a]] + runif(1)    #get hungrier
       curbladder[[a]] = curbladder[[a]] + runif(1)  #bladder fills
+      
       
       if(agentstates[[a]] == -10){         # if moving, continue
         tosearch = agentpaths[[a]][1:length(agentpaths[[a]])-1]
@@ -56,30 +64,32 @@ for (d in 1:num_days){            #iterate over days
         }
       }
       
+      
       if(nodeloci[[a]] %in% kitchen_spot && agentstates[[a]] != -10){    # if in the kitchen
         curhunger[[a]] = 0   #reset hunger
       } else if(nodeloci[[a]] %in% wc_spot && agentstates[[a]] != -10){  # if in the washroom
         curbladder[[a]] = 0   #empty bladder
-     }
+      }
+      
       
       if(nodeloci[[a]] != workstation[[a]] && agentstates[[a]] == 0){  #if not @ desk & working
         agentstates[[a]] = -10                                       #then: go to your desk
-        pickapath(nodeloci[[a]],workstation[[a]],a,0)
+        pickapath(nodeloci[[a]], workstation[[a]], a, 0)
       }
-      if(nodeloci[[a]] %notin% kitchen_spot && agentstates[[a]] == 1){   #if not @ kitchen & eating
+      if(nodeloci[[a]] %notin% kitchen_spot[[1]] && agentstates[[a]] == 1){   #if not @ kitchen & eating
         agentstates[[a]] = -10                        #then: go to kitchen
-        pickapath(nodeloci[[a]],kitchen_spot,a,1)
+        pickapath(nodeloci[[a]], kitchen_spot[[1]], a, 1)
       }
-      if(nodeloci[[a]] %notin% wc_spot && agentstates[[a]]==3){   #if not @ WC & peeing
+      if(nodeloci[[a]] %notin% wc_spot[[1]] && agentstates[[a]]==3){   #if not @ WC & peeing
         agentstates[[a]] = -10                        #then: go to WC
-        pickapath(nodeloci[[a]],wc_spot,a,3)
+        pickapath(nodeloci[[a]], wc_spot[[1]], a, 3)
       }
       
       if(nodeloci[[a]] %notin% sr_spots && agentstates[[a]]==2){   #if not @ relax & relaxing
         agentstates[[a]] = -10                        #then: go to relax
         for(p in 1:length(sr_spots)){              #iterate over relax spots
-          attlone(nodeloci[[a]], sr_spots[[p]])  #find attractivenesses of all paths to all relax spots and place in global environment
-        }                                       #attractiveness function is part 1 of pickapath and movepath function is part 2 of pickapath
+          attlone(nodeloci[[a]], sr_spots[[p]])  #find attractiveness of all paths
+        }                                      
         bestpath <- sort(attlist, decreasing = T)[1]       #find best path
         mypath <- pathlist[[which(attlist == bestpath)]]
         movepath(mypath,a,2)          #move along that path
@@ -88,12 +98,16 @@ for (d in 1:num_days){            #iterate over days
       if(nodeloci[[a]] %notin% sr_spots && agentstates[[a]]==4){   #if not @ social & social
         agentstates[[a]] = -10                        #then: go to socializing spot
         for(p in 1:length(sr_spots)){              #iterate over soc spots
-          attlone(nodeloci[[a]], sr_spots[[p]])  #find attractivenesses of all paths to all soc spots and place in global environment
-        }                                                 #attractiveness function is part 1 of pickapath and movepath function is part 2 of pickapath
+          attlone(nodeloci[[a]], sr_spots[[p]])  #find attractiveness of all paths
+        }                                                  
         bestpath <- sort(attlist, decreasing = T)[1]       #find best path
         mypath <- pathlist[[which(attlist == bestpath)]]
         movepath(mypath,a,4)          #move along that path
       }
+      
+      
+      happy(a)  #update agent happiness
+      
       
       if(agentstates[[a]] != -10){  #if not moving
         telapsed[[a]] = telapsed[[a]] + 1  #add time
@@ -119,6 +133,7 @@ for (d in 1:num_days){            #iterate over days
           telapsed[[a]] = 0      # reset telapsed to 0
         }
       }
+    }
   
     #record history
     statehistory[length(statehistory)+1] = list(agentstates)

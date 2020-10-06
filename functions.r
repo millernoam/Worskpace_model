@@ -1,23 +1,24 @@
+#This script stores all the functions
+
+
+#gives the probabilities for testing, for one agent at one time in one state
 giveprob <- function(time, tspent, person, blad, hung, state){  
-  #gives the probs for testing, for one agent at one time in one state
   cm=makeprobs(time,tspent,person,blad,hung)
   output = cm[ ,state+1]/sum(cm[ ,state+1])
   return(zapsmall(output,3))
 }
+
+
+#gives the matrix for testing, [not normalized!]
 giveallprob <- function(time, tspent, person, blad, hung){  
-  #gives the matrix for testing, [not normalized!]
   cm=makeprobs(time,tspent,person,blad,hung)
   return(zapsmall(cm,4))
 }
-showthenet <- function(){
-  #plots the current network. could be made more complex
-  layt = layout.fruchterman.reingold(floorG)
-  tkplot(floorG, canvas.width=750,canvas.height=550, layout=layt, vertex.color='white')
-}
+
+
+#just like pickapath, but returns the path rather than attaching it to 
+#any agent. For testing purposes. no agent or endstate needed.
 givepath <- function(startnode, endnode){
-  #just like pickapath, but returns the path rather than attaching it to 
-  #any agent. For testing purposes. no agent or endstate needed.
-  
   paths <<- all_simple_paths(floorG, from = names(floor)[[startnode]], to = names(floor)[[endnode]]) #all possible simple paths
   attractiveness <<- rep(NA, length = length(paths)) #empty list for path attractiveness
   
@@ -39,6 +40,9 @@ givepath <- function(startnode, endnode){
   }
   return(unlist(pathbynums))
 }
+
+
+#[describe function]
 showapath <- function(startnode, endnode){
   short <- all_shortest_paths(floorG, from = names(floor)[[startnode]], to = names(floor)[[endnode]])    # Shortest path from the startnode to the endnode
   mypath = short$res[[1]]  # agent's path is the first shortest one
@@ -49,6 +53,8 @@ showapath <- function(startnode, endnode){
   return(list(unlist(pathbynums),mypath))   # return the path
 }
 
+
+#[describe function]
 movepath <- function(mypath, me, endstate){
   pathbynums <- vector(mode = "list", length = length(mypath))  #vector for path
   for (j in 1:length(mypath)){                                  # iterate through the path
@@ -58,6 +64,8 @@ movepath <- function(mypath, me, endstate){
   agentpaths[[me]] <<- pathbynums # add path to agentpaths for this agent
 }
 
+
+#[describe function]
 attlone <- function(startnode, endnode){
   attlist <<- list()
   pathlist <<- list()
@@ -76,12 +84,12 @@ attlone <- function(startnode, endnode){
   attlist <- append(attlist, attractiveness)
 }
 
+
+#selects the most attractive path from startnode to endnode
+#for one agent, me. Sets agent state to endstate at the end
+#places path as a vector of nodes (with endstate @ the end) into agentpaths
+#[returns nothing]
 pickapath <- function(startnode, endnode, me, endstate){
-  #selects the most attractive path from startnode to endnode
-  #for one agent, me. Sets agent state to endstate at the end
-  #places path as a vector of nodes (with endstate @ the end) into agentpaths
-  #[returns nothing]
-  
   paths <<- all_simple_paths(floorG, from = names(floor)[[startnode]], to = names(floor)[[endnode]]) #all possible simple paths
   attractiveness <<- rep(NA, length = length(paths)) #empty list for path attractiveness
   
@@ -105,64 +113,109 @@ pickapath <- function(startnode, endnode, me, endstate){
   agentpaths[[me]] <<- pathbynums # add path to agentpaths for this agent
 }
 
+
+#Initializes the model; sets everything up
 initialize <- function(){
-  agentpaths <<- list() #list of current path for each agent   
-  agentstates <<- c()   #list of current state of each agent
-  nodeloci <<- c()     #list of current position for each agent
-  telapsed <<- c()    #list of time elapsed for each agent
-  workstation <<- sample(ws_spots,numagents,replace=T)  #work pos for each agent
+  agentpaths <<- list()   #list of current path for each agent   
+  agentstates <<- c()     #list of current state of each agent
+  nodeloci <<- c()        #list of current position for each agent
+  telapsed <<- c()        #list of time elapsed for each agent
+  workstation <<- sample(ws_spots,numagents,replace=T)  #work node for each agent
   personality <<- list()  #personality of each agent
-  curbladder <<- list()  #current bladder state of each agent
-  curhunger <<- list()   #current hunger level of each agent
-  thistory <<- list()  #history of telapsed
-  blanklist = list(0)  #a blank list
-  for(i in 1:(numagents)){   # iterate over agents
-    agentpaths <<- append(agentpaths, blanklist)  #no current path
-    agentstates <<- c(agentstates, 0)  #state = 0
-    telapsed <<- c(telapsed, 0)  #tealpsed = 0
-    curbladder <<- c(curbladder, 0)  #bladder empty
-    curhunger <<- c(curhunger, 0)    #not hungry
-    foodiness <- rnorm(1, mean = foodpersmean, sd = foodperssd)  #personality: foodiness, social, work ethic, bladder_cap
+  curbladder <<- list()   #current bladder state of each agent
+  curhunger <<- list()    #current hunger level of each agent
+  happiness <<- c()       #happiness of each agent
+  agentnodeatt <<- list() #node attractiveness for each agent
+  blanklist = list(0)     #a blank list
+  
+  thistory <<- list()     #history of telapsed
+  statehistory <<- c()   #history of agent states
+  nodehistory <<- c()    #history of agent positions
+  
+  for(i in 1:numagents){        # for each agent:
+    happiness <<- append(happiness, 0)                    #start happiness at 0
+    agentnodeatt <<- append(agentnodeatt, list(nodeatt))  #attractiveness of nodes
+    agentpaths <<- append(agentpaths, blanklist)          #no current path
+    agentstates <<- c(agentstates, 0)                     #state = 0
+    telapsed <<- c(telapsed, 0)                           #tealpsed = 0
+    curbladder <<- c(curbladder, 0)                       #bladder empty
+    curhunger <<- c(curhunger, 0)                         #not hungry
+    nodeloci <<- c(nodeloci, sample(out_spots,1))         #start outside
+    
+    foodiness <- rnorm(1, mean = foodpersmean, sd = foodperssd)  #personality 
     sociability <- rnorm(1, mean = socpersmean, sd = socperssd)
     workethic <- rnorm(1, mean = workpersmean, sd = workperssd)
     bladsize <- rnorm(1, mean = bladpersmean, sd = bladperssd)
-    traits <- c(foodiness, sociability, workethic, bladsize)
+    traits <- c(foodiness, sociability, workethic, bladsize)  
     mylist <- list(traits)
     personality[length(personality)+1] <<- mylist
-    nodeloci <<- c(nodeloci, sample(out_spots,1))  # start with people outside
   }
-  statehistory <<- c()
-  nodehistory <<- c()
-  statehistory[length(statehistory)+1] <<- list(agentstates) # the last state agent was in is their current state
-  nodehistory[length(nodehistory)+1] <<- list(nodeloci)    # the last node agent was in is their current location
+
+  #fill in initial states into histories
+  statehistory[length(statehistory)+1] <<- list(agentstates)
+  nodehistory[length(nodehistory)+1] <<- list(nodeloci)
   thistory[length(thistory)+1] <<- list(telapsed)
+  
+  perscdf <<- makecdf(socpersmean, socperssd)
 }
 
-dosr <- function(){  #update social dynamics
+
+#updates the social dynamics
+dosr <- function(){  
   for(a in 1:numagents){
     
-    if(nodeloci[[a]] %in% sr_spots && agentstates[[a]] == 2){       #if agent is in an sr_spot
-      fellows <- which(nodeloci == nodeloci[[a]])                   #who else is there?
-      if(length(fellows) == 0){
-        agentstates[[a]] = 2
-      } else {                                      #if there is anyone else there
-        localchatters <- which(agentstates[fellows] == 4)           #are those people socialising?
-        if(length(localchatters == 0)){             #if nobody is socializing
-          
-        } else {     #others in same space, but not socializing
-          
-        }
+    if(nodeloci[[a]] %in% sr_spots){                    #if in an sr_spot
+      fellows <- which(nodeloci == nodeloci[[a]])         #who else is there?
+      
+      if(agentstates[[a]] == 2){          #[if relaxing]
         
+        if(length(fellows) == 0){                         #nobody, relax
+          agentstates[[a]] = 2
+        } else {                                          #somebody
+          localchatters <- which(agentstates[fellows] == 4)  #are they social?
+          if(length(localchatters == 0)){                      #no, relax
+            agentstates[[a]] = 2
+          } else {                                             #yes, MIX
+            #MIX code here!!
+          }
+        }
+         
+      } else if(agentstates[[a]] == 4){   #[if being social]
+        
+        if(length(fellows) == 0){                         #nobody
+          probleave = perscdf(personality[a][[2]])
+          rando = runif(1)
+          if(rando <= probleave){
+            #choose another place to go to
+            agentstates[[a]] = -10  #leave
+          } else{
+            agentstates[[a]] = 2     #relax
+          }
+          
+        } else {                                          #somebody
+          localchatters <- which(agentstates[fellows] == 4)  #are they social?
+          if(length(localchatters > 0)){                      #yes, be social
+            agentstates[[a]] = 4
+          } else {                                             #no, MIX
+            #MIX code here!!
+          }
+        }
       }
     }
-    
   }
-  
 }
 
+
+#returns a cdf of a normal distribution
+makecdf <- function(mu, sig){
+  samples = rnorm(10000, mean = mu, sd = sig)
+  return(ecdf(samples))
+}
+
+
+#calculate the transition matrix, by time
+#takes as input: current sim time + agent values: tspent, personality, bladder, hunger
 makeprobs <- function(time, tspent, person, blad, hung){
-  #calculate the transition matrix, by time
-  #takes as input: current sim time + agent values: tspent, personality, bladder, hunger
   output = data.frame(Work=c(0,0,0,0,0),
                       Eat=c(0,0,0,0,0),
                       Relax=c(0,0,0,0,0),
@@ -230,7 +283,34 @@ makeprobs <- function(time, tspent, person, blad, hung){
   return(output)
 }
 
-showagent <- function(a){   #show a range of info on one agent
+
+#update an agent's happiness
+happy <- function(agent){
+  if(agentstates[[agent]] != -10 && agentstates[[agent]] != 3){
+    if(agentstates[agent] == 0){
+      trait = personality[[agent]][3]
+      traitmean = workmean
+    } else if(agentstates[[agent]] == 2){
+      trait = (workmean*2) - (personality[[agent]][3])
+      traitmean = workmean
+    }
+    happiness[[agent]] = (happiness[[agent]] + (trait/traitmean))  #divide trait by trait mean and add that to happiness
+  }
+}
+
+
+#functions that display the results -------------------------------------------
+
+
+#plots the current network. could be made more complex
+showthenet <- function(){
+  layt = layout.fruchterman.reingold(floorG)
+  tkplot(floorG, canvas.width=750,canvas.height=550, layout=layt, vertex.color='white')
+}
+
+
+#show a range of info on one agent
+showagent <- function(a){   
   windows(width=10, height=7)
   per=personality[[a]]
   par(mfrow=c(2,2),oma=c(0,0,2,0), mar=c(3,3,3,3))
@@ -298,7 +378,10 @@ showagent <- function(a){   #show a range of info on one agent
   
   mtext(paste("Agent ", toString(a), " summary", sep=""), outer=TRUE, cex=1.5)
 }
-showtimedists <-function(){   #show distributions of time in state for all agents
+
+
+#show distributions of time in state for all agents
+showtimedists <-function(){   
   par(mfrow=c(1,1))
   data = list()
   for(a in 1:numagents){
@@ -320,4 +403,3 @@ showtimedists <-function(){   #show distributions of time in state for all agent
   legend("topright",legend=c("Move","Work","Eat","Relax","WC","Social"),
          col=c("red","blue","green","brown","orange","black"),lty=1)
 }
-
