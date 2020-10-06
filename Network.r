@@ -18,4 +18,4 @@ F1Graph <- graph_from_adjacency_matrix(F1)
 
 #read in node attractiveness list
 F1att <- read_xlsx("network node codebook.xlsx", 1)
-F1nodeatt = as.list(att[3])[[1]]
+F1nodeatt = as.list(F1att[3])[[1]]
