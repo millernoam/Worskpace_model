@@ -42,7 +42,7 @@ givepath <- function(startnode, endnode){
 }
 
 
-#[describe function]
+#shows the shortest path from startnode to endnode
 showapath <- function(startnode, endnode){
   short <- all_shortest_paths(floorG, from = names(floor)[[startnode]], to = names(floor)[[endnode]])    # Shortest path from the startnode to the endnode
   mypath = short$res[[1]]  # agent's path is the first shortest one
@@ -54,7 +54,7 @@ showapath <- function(startnode, endnode){
 }
 
 
-#[describe function]
+#Move agent along a designated path with a determined end state
 movepath <- function(mypath, me, endstate){
   pathbynums <- vector(mode = "list", length = length(mypath))  #vector for path
   for (j in 1:length(mypath)){                                  # iterate through the path
@@ -65,7 +65,7 @@ movepath <- function(mypath, me, endstate){
 }
 
 
-#[describe function]
+#find the most attractive path from startnode to endnode
 attlone <- function(startnode, endnode){
   attlist <<- list()
   pathlist <<- list()
