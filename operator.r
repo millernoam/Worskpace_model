@@ -1,9 +1,8 @@
-#this script runs the model
-
-setwd("C:/Research/projects/Jovan model")  #folder where the data are
+setwd("C:/Users/Jovan/Documents/Model split up")
 
 source("Network.R")
+source("Parameters.R")
+setwd("C:/Users/Jovan/Documents/Model split up")
 source("functions.R")
 
-#run the model 10 times
 lapply(1:10, function(n)source("runfilenew.R"))
