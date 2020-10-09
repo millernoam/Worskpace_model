@@ -5,7 +5,6 @@ library(igraph)
 
 #read in floor plan and clean up data
 floorPlan <- read_excel(mynet, 2)
-floorPlan <- subset(floorPlan, select = -c(1))
 floorPlan <- `rownames<-`(floorPlan, colnames(floorPlan))
 F1 <- data.matrix(floorPlan)  #convert data into matrix
 
