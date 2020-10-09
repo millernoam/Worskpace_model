@@ -134,7 +134,7 @@ initialize <- function(){
   
   for(i in 1:numagents){        # for each agent:
     happiness <<- append(happiness, 0)                    #start happiness at 0
-    agentnodeatt <<- append(agentnodeatt, list(nodeatt))  #attractiveness of nodes
+    agentnodeatt <<- append(agentnodeatt, list(node_attractiveness))  #attractiveness of nodes
     agentpaths <<- append(agentpaths, blanklist)          #no current path
     agentstates <<- c(agentstates, 0)                     #state = 0
     telapsed <<- c(telapsed, 0)                           #tealpsed = 0
@@ -162,47 +162,98 @@ initialize <- function(){
 
 #updates the social dynamics
 dosr <- function(){  
-  for(a in 1:numagents){
+  
+  tempstates <- c()  #temporary storage for new states
+  
+  for(a in 1:numagents){  #for each agent
     
     if(nodeloci[[a]] %in% sr_spots){                    #if in an sr_spot
       fellows <- which(nodeloci == nodeloci[[a]])         #who else is there?
       
       if(agentstates[[a]] == 2){          #[if relaxing]
         
-        if(length(fellows) == 0){                         #nobody, relax
-          agentstates[[a]] = 2
+        if(length(fellows) == 1){                         #nobody but me, relax
+          tempstates <- append(tempstates, 2)
+          agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] + alpha
+          
         } else {                                          #somebody
           localchatters <- which(agentstates[fellows] == 4)  #are they social?
           if(length(localchatters == 0)){                      #no, relax
-            agentstates[[a]] = 2
+            tempstates <- append(tempstates, 2)
+            agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] + alpha
+            
           } else {                                             #yes, MIX
-            #MIX code here!!
+            localrelaxers <- which(agentstates[fellows] == 2)  #others relaxing
+            
+            relaxsum = 0        #sum of relaxers' sociability
+            for(i in fellows[localrelaxers]){
+              relaxsum = relaxsum + personality[[i]][2]
+            }
+            socialsum = 0       #sum of socializers' sociability
+            for(i in fellows[localchatters]){
+              socialsum = socialsum + personality[[i]][2]
+            }
+            
+            if(socialsum >= relaxsum){   #strongest force wins
+              tempstates <- append(tempstates, 4)
+              agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] - alpha
+              
+            } else {
+              tempstates <- append(tempstates, 2)
+              agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] + alpha
+            }
           }
         }
         
       } else if(agentstates[[a]] == 4){   #[if being social]
         
-        if(length(fellows) == 0){                         #nobody
-          probleave = perscdf(personality[a][[2]])
+        if(length(fellows) == 1){                      #nobody but me
+          probleave = perscdf(personality[a][[2]])      #P(leave) ~ sociability
           rando = runif(1)
           if(rando <= probleave){
-            #choose another place to go to
-            agentstates[[a]] = -10  #leave
+            tempstates <- append(tempstates, -10)
+            agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] - alpha
+            
+            #choose another place to go to!!!!!!!!!!!!!!!
+            pickapath(nodeloci[[a]], workstation[[a]], a, 0) #stopgap: go back to desk & work!!!!!!
+            
           } else{
-            agentstates[[a]] = 2     #relax
+            tempstates <- append(tempstates, 2)     #don't leave, relax
+            agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] - alpha
           }
           
         } else {                                          #somebody
           localchatters <- which(agentstates[fellows] == 4)  #are they social?
-          if(length(localchatters > 0)){                      #yes, be social
-            agentstates[[a]] = 4
+          if(length(localchatters > 1)){          #yes (other than self), be social 
+            tempstates <- append(tempstates, 4)
+            agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] + alpha
+            
           } else {                                             #no, MIX
-            #MIX code here!!
+            localrelaxers <- which(agentstates[fellows] == 2)  #others relaxing
+            
+            relaxsum = 0        #sum of relaxers' sociability
+            for(i in fellows[localrelaxers]){
+              relaxsum = relaxsum + personality[[i]][2]
+            }
+            socialsum = 0       #sum of socializers' sociability
+            for(i in fellows[localchatters]){
+              socialsum = socialsum + personality[[i]][2]
+            }
+            
+            if(socialsum >= relaxsum){   #strongest force wins
+              tempstates <- append(tempstates, 4)
+              agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] + alpha
+              
+            } else {
+              tempstates <- append(tempstates, 2)
+              agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] - alpha
+            }
           }
         }
       }
     }
   }
+  agentstates = tempstates  #set all agents' new states synchronously
 }
 
 

@@ -1,6 +1,6 @@
-setwd("C:/Users/Jovan/Documents/Model split up")  #enter the path to all files
+setwd("C:/Research/projects/Jovan model/model files")  #enter the path to all files
 
-mynet = "network node codebook.xlsx"              #enter file name for network
+mynet = "network node codebook new.xlsx"              #enter file name for network
 
 source("Network.R")
 source("functions.R")

@@ -12,7 +12,7 @@ F1 <- data.matrix(floorPlan)  #convert data into matrix
 F1Graph <- graph_from_adjacency_matrix(F1)
 
 #read in node attractiveness list
-node_attractiveness<-c(read_xlsx(mynet, 1)[[3]])  #list of node attractiveness
+node_attractiveness<<-c(read_xlsx(mynet, 1)[[3]])  #list of node attractiveness
 
 #read in other parameters
 ws_spots = na.omit(c(read_excel(mynet,3)[[1]]))        #list of workstations
@@ -24,15 +24,16 @@ out_spots = na.omit(c(read_excel(mynet,3)[[5]]))       #outside spots
 total_time = (c(read_excel(mynet,5)[[1]]))              #length of the day
 numagents = (c(read_excel(mynet,5)[[2]]))               #number of agents
 num_days = (c(read_excel(mynet,5)[[3]]))                #number of days to run
+alpha = (c(read_excel(mynet,5)[[4]]))                   #learning rate
 
-foodmean = (c(read_excel(mynet,4)[[2]][3]))             #Mean of foodiness
-foodsd = (c(read_excel(mynet,4)[[3]][3]))               #SD of foodiness
-socmean = (c(read_excel(mynet,4)[[2]][1]))              #Mean of sociability
-socsd = (c(read_excel(mynet,4)[[3]][1]))                #SD of sociability
-workmean = (c(read_excel(mynet,4)[[2]][2]))             #Mean of work ethic
-worksd = (c(read_excel(mynet,4)[[3]][2]))               #SD of work ethic
-bladmean = (c(read_excel(mynet,4)[[2]][4]))             #Mean of bladdercap
-bladsd = (c(read_excel(mynet,4)[[3]][4]))               #SD of bladdercap
+foodpersmean = (c(read_excel(mynet,4)[[2]][3]))             #Mean of foodiness
+foodperssd = (c(read_excel(mynet,4)[[3]][3]))               #SD of foodiness
+socpersmean = (c(read_excel(mynet,4)[[2]][1]))              #Mean of sociability
+socperssd = (c(read_excel(mynet,4)[[3]][1]))                #SD of sociability
+workpersmean = (c(read_excel(mynet,4)[[2]][2]))             #Mean of work ethic
+workperssd = (c(read_excel(mynet,4)[[3]][2]))               #SD of work ethic
+bladpersmean = (c(read_excel(mynet,4)[[2]][4]))             #Mean of bladdercap
+bladperssd = (c(read_excel(mynet,4)[[3]][4]))               #SD of bladdercap
 
 ########################      Make random network       ###########################################################################################################################3
 
