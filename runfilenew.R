@@ -9,6 +9,7 @@ initialize()
 
 # run the model -------------------------------
 for (d in 1:num_days){            #iterate over days
+  initializeday()
   
   #things remembered across days go here !!!!!!!!!!!!!!!!!!!!
   
@@ -35,9 +36,9 @@ for (d in 1:num_days){            #iterate over days
       }
       
       
-      if(nodeloci[[a]] %in% kitchen_spot && agentstates[[a]] != -10){    # if in the kitchen
+      if(nodeloci[[a]] %in% kitchen_spots && agentstates[[a]] != -10){    # if in the kitchen
         curhunger[[a]] = 0   #reset hunger
-      } else if(nodeloci[[a]] %in% wc_spot && agentstates[[a]] != -10){  # if in the washroom
+      } else if(nodeloci[[a]] %in% wc_spots && agentstates[[a]] != -10){  # if in the washroom
         curbladder[[a]] = 0   #empty bladder
       }
       
@@ -46,13 +47,25 @@ for (d in 1:num_days){            #iterate over days
         agentstates[[a]] = -10                                       #then: go to your desk
         pickapath(nodeloci[[a]], workstation[[a]], a, 0)
       }
-      if(nodeloci[[a]] %notin% kitchen_spot[[1]] && agentstates[[a]] == 1){   #if not @ kitchen & eating
-        agentstates[[a]] = -10                        #then: go to kitchen
-        pickapath(nodeloci[[a]], kitchen_spot[[1]], a, 1)
+      
+      if(nodeloci[[a]] %notin% kitchen_spots && agentstates[[a]] == 1){   #if not @ kitchen & eating
+        agentstates[[a]] = -10                                #then: go to kitchen
+        for(p in 1:length(kitchen_spots)){                    #iterate over kitchen spots
+          attlone(nodeloci[[a]], kitchen_spots[[p]])          #find attractiveness of all paths
+        }                                      
+        bestpath <- sort(attlist, decreasing = T)[1]          #find best path
+        mypath <- pathlist[[which(attlist == bestpath)]]
+        movepath(mypath,a,1)                                  #move along that path
       }
-      if(nodeloci[[a]] %notin% wc_spot[[1]] && agentstates[[a]]==3){   #if not @ WC & peeing
+      
+      if(nodeloci[[a]] %notin% wc_spots && agentstates[[a]]==3){   #if not @ WC & peeing
         agentstates[[a]] = -10                        #then: go to WC
-        pickapath(nodeloci[[a]], wc_spot[[1]], a, 3)
+        for(p in 1:length(wc_spots)){              #iterate over washroom spots
+          attlone(nodeloci[[a]], wc_spots[[p]])  #find attractiveness of all paths
+        }                                      
+        bestpath <- sort(attlist, decreasing = T)[1]       #find best path
+        mypath <- pathlist[[which(attlist == bestpath)]]
+        movepath(mypath,a,3)          #move along that path
       }
       
       if(nodeloci[[a]] %notin% sr_spots && agentstates[[a]]==2){   #if not @ relax & relaxing
