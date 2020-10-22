@@ -113,7 +113,24 @@ pickapath <- function(startnode, endnode, me, endstate){
   agentpaths[[me]] <<- pathbynums # add path to agentpaths for this agent
 }
 
-
+#Initializes the model at the start of each day so as to keep history from the last run
+initializeday <- function(){
+  agentpaths <<- list()   #list of current path for each agent   
+  agentstates <<- c()     #list of current state of each agent
+  nodeloci <<- c()        #list of current position for each agent
+  telapsed <<- c()        #list of time elapsed for each agent
+  curbladder <<- list()   #current bladder state of each agent
+  curhunger <<- list()    #current hunger level of each agent
+  blanklist = list(0)     #a blank list
+  for(i in 1:numagents){        # for each agent:
+    agentpaths <<- append(agentpaths, blanklist)          #no current path
+    agentstates <<- c(agentstates, 0)                     #state = 0
+    telapsed <<- c(telapsed, 0)                           #tealpsed = 0
+    curbladder <<- c(curbladder, 0)                       #bladder empty
+    curhunger <<- c(curhunger, 0)                         #not hungry
+    nodeloci <<- c(nodeloci, sample(out_spots,1))         #start outside
+  }
+}
 #Initializes the model; sets everything up
 initialize <- function(){
   agentpaths <<- list()   #list of current path for each agent   
@@ -340,10 +357,19 @@ happy <- function(agent){
   if(agentstates[[agent]] != -10 && agentstates[[agent]] != 3){
     if(agentstates[agent] == 0){
       trait = personality[[agent]][3]
-      traitmean = workmean
+      traitmean = workpersmean
+    } else if(agentstates[[agent]] == 1){
+      trait = personality[[agent]][1]
+      traitmean = foodpersmean
     } else if(agentstates[[agent]] == 2){
-      trait = (workmean*2) - (personality[[agent]][3])
-      traitmean = workmean
+      trait = (workpersmean*2) - (personality[[agent]][3])
+      traitmean = workpersmean
+    } else if(agentstates[[agent]] == 3){
+      trait = personality[[agent]][4]
+      traitmean = bladpersmean
+    } else if(agentstates[agent] == 4){
+      trait = personality[[agent]][2]
+      traitmean = socpersmean
     }
     happiness[[agent]] = (happiness[[agent]] + (trait/traitmean))  #divide trait by trait mean and add that to happiness
   }
