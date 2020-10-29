@@ -100,7 +100,7 @@ pickapath <- function(startnode, endnode, me, endstate){
         attractiveness[[i]] = attractiveness[[i]] + nodeatt[[n]]
       }
     }
-    attractiveness[[i]] = attractiveness[[i]] - (length(paths[[i]]) * 3)  # att -= length of path x 3
+    attractiveness[[i]] = attractiveness[[i]] - (length(paths[[i]]) * attrade)  # att -= length of path x 3
   }
   
   bestpath <<- sort(attractiveness, decreasing = T)[1]  #most attractive path
@@ -112,6 +112,7 @@ pickapath <- function(startnode, endnode, me, endstate){
   pathbynums[length(pathbynums)+1] = endstate  # add endstate @ end of path
   agentpaths[[me]] <<- pathbynums # add path to agentpaths for this agent
 }
+
 
 #Initializes the model at the start of each day so as to keep history from the last run
 initializeday <- function(){
@@ -131,6 +132,8 @@ initializeday <- function(){
     nodeloci <<- c(nodeloci, sample(out_spots,1))         #start outside
   }
 }
+
+
 #Initializes the model; sets everything up
 initialize <- function(){
   agentpaths <<- list()   #list of current path for each agent   
@@ -149,6 +152,7 @@ initialize <- function(){
   thistory <<- list()     #history of telapsed
   statehistory <<- c()   #history of agent states
   nodehistory <<- c()    #history of agent positions
+  atthistory <<- c()     #history of node attractiveness
   
   for(i in 1:numagents){        # for each agent:
     happiness <<- append(happiness, 0)                    #start happiness at 0
@@ -180,7 +184,7 @@ initialize <- function(){
 
 
 #updates the social dynamics
-dosr <- function(){  
+dosr <- function(d, t){  
   
   tempstates <- c()  #temporary storage for new states
   
@@ -194,12 +198,16 @@ dosr <- function(){
         if(length(fellows) == 1){                         #nobody but me, relax
           tempstates <- append(tempstates, 2)
           agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] + alpha
+          #record change in attractiveness: [day, time, agent#, node#, 1, new value]
+          atthistory[length(atthistory)+1] <<- c(d, t, a, nodeloci[[a]], 1, agentnodeatt[[a]][nodeloci[[a]]])
           
         } else {                                          #somebody
           localchatters <- which(agentstates[fellows] == 4)  #are they social?
           if(length(localchatters == 0)){                      #no, relax
             tempstates <- append(tempstates, 2)
             agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] + alpha
+            #record change in attractiveness: [day, time, agent#, node#, 1, new value]
+            atthistory[length(atthistory)+1] <<- c(d, t, a, nodeloci[[a]], 1, agentnodeatt[[a]][nodeloci[[a]]])
             
           } else {                                             #yes, MIX
             localrelaxers <- which(agentstates[fellows] == 2)  #others relaxing
@@ -216,10 +224,14 @@ dosr <- function(){
             if(socialsum >= relaxsum){   #strongest force wins
               tempstates <- append(tempstates, 4)
               agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] - alpha
+              #record change in attractiveness: [day, time, agent#, node#, -1, new value]
+              atthistory[length(atthistory)+1] <<- c(d, t, a, nodeloci[[a]], -1, agentnodeatt[[a]][nodeloci[[a]]])
               
             } else {
               tempstates <- append(tempstates, 2)
               agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] + alpha
+              #record change in attractiveness: [day, time, agent#, node#, 1, new value]
+              atthistory[length(atthistory)+1] <<- c(d, t, a, nodeloci[[a]], 1, agentnodeatt[[a]][nodeloci[[a]]])
             }
           }
         }
@@ -232,13 +244,17 @@ dosr <- function(){
           if(rando <= probleave){
             tempstates <- append(tempstates, -10)
             agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] - alpha
+            #record change in attractiveness: [day, time, agent#, node#, -1, new value]
+            atthistory[length(atthistory)+1] <<- c(d, t, a, nodeloci[[a]], -1, agentnodeatt[[a]][nodeloci[[a]]])
             
             #choose another place to go to!!!!!!!!!!!!!!!
-            pickapath(nodeloci[[a]], workstation[[a]], a, 0) #stopgap: go back to desk & work!!!!!!
+            pickapath(nodeloci[[a]], workstation[[a]], a, 0) #stopgap: go back to desk & work
             
           } else{
             tempstates <- append(tempstates, 2)     #don't leave, relax
             agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] - alpha
+            #record change in attractiveness: [day, time, agent#, node#, -1, new value]
+            atthistory[length(atthistory)+1] <<- c(d, t, a, nodeloci[[a]], -1, agentnodeatt[[a]][nodeloci[[a]]])
           }
           
         } else {                                          #somebody
@@ -246,6 +262,8 @@ dosr <- function(){
           if(length(localchatters > 1)){          #yes (other than self), be social 
             tempstates <- append(tempstates, 4)
             agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] + alpha
+            #record change in attractiveness: [day, time, agent#, node#, 1, new value]
+            atthistory[length(atthistory)+1] <<- c(d, t, a, nodeloci[[a]], 1, agentnodeatt[[a]][nodeloci[[a]]])
             
           } else {                                             #no, MIX
             localrelaxers <- which(agentstates[fellows] == 2)  #others relaxing
@@ -262,10 +280,14 @@ dosr <- function(){
             if(socialsum >= relaxsum){   #strongest force wins
               tempstates <- append(tempstates, 4)
               agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] + alpha
+              #record change in attractiveness: [day, time, agent#, node#, 1, new value]
+              atthistory[length(atthistory)+1] <<- c(d, t, a, nodeloci[[a]], 1, agentnodeatt[[a]][nodeloci[[a]]])
               
             } else {
               tempstates <- append(tempstates, 2)
               agentnodeatt[[a]][nodeloci[[a]]] = agentnodeatt[[a]][nodeloci[[a]]] - alpha
+              #record change in attractiveness: [day, time, agent#, node#, -1, new value]
+              atthistory[length(atthistory)+1] <<- c(d, t, a, nodeloci[[a]], -1, agentnodeatt[[a]][nodeloci[[a]]])
             }
           }
         }
@@ -373,120 +395,7 @@ happy <- function(agent){
       trait = personality[[agent]][2]
       traitmean = socpersmean
     }
-    happiness[[agent]] = (happiness[[agent]] + (trait/traitmean))  #divide trait by trait mean and add that to happiness
+    happiness[[agent]] <<- (happiness[[agent]] + (trait/traitmean))  #divide trait by trait mean and add that to happiness
   }
 }
 
-
-#functions that display the results -------------------------------------------
-
-
-#plots the current network. could be made more complex
-showthenet <- function(){
-  layt = layout.fruchterman.reingold(floorG)
-  tkplot(floorG, canvas.width=750,canvas.height=550, layout=layt, vertex.color='white')
-}
-
-
-#show a range of info on one agent
-showagent <- function(a){   
-  windows(width=10, height=7)
-  per=personality[[a]]
-  par(mfrow=c(2,2),oma=c(0,0,2,0), mar=c(3,3,3,3))
-  
-  title="Time in each state"
-  bpdat= table(factor(state_h_data[[a]],levels=c(-10,0,1,2,3,4)))
-  barplot(bpdat/total_time, main=title, axis.lty=1,
-          names.arg=c("Move","Work","Eat","Relax","WC","Social"))
-  
-  title=paste("Time @ node. Desk = ", toString(workstation[[a]]), sep="")
-  barplot(table(node_h_data[[a]])/total_time, main=title, axis.lty=1)
-  
-  title="Personality"
-  bp <- barplot(per, main=title,names.arg=c("Hunger","Social","Ethic","Bladder"),ylim=c(-5,5),axis.lty=1)
-  text(bp,-4,signif(per,2), col="blue")
-  bp
-  
-  vr = rle(state_h_data[[a]])
-  seq0 = vr$lengths[which(vr$values==0)]
-  seq0 = seq0[-which(seq0<=1)]
-  seq1 = vr$lengths[which(vr$values==1)]
-  seq1 = seq1[-which(seq1<=1)]
-  seq2 = vr$lengths[which(vr$values==2)]
-  seq2 = seq2[-which(seq2<=1)]
-  seq3 = vr$lengths[which(vr$values==3)]
-  seq3 = seq3[-which(seq3<=1)]
-  seq4 = vr$lengths[which(vr$values==4)]
-  seq4 = seq4[-which(seq4<=1)]
-  
-  if(length(seq0)>1){
-    dat0 = seq0
-  } else{ 
-    dat0 = rep(-100,100)
-  }
-  if(length(seq1)>1){
-    dat1 = seq1
-  } else{ 
-    dat1 = rep(-100,100)
-  }
-  if(length(seq2)>1){
-    dat2 = seq2
-  } else{ 
-    dat2 = rep(-100,100)
-  }
-  if(length(seq3)>1){
-    dat3 = seq3
-  } else{ 
-    dat3 = rep(-100,100)
-  }
-  if(length(seq4)>1){
-    dat4 = seq4
-  } else{ 
-    dat4 = rep(-100,100)
-  }
-  mymax=max(density(dat0)$y,density(dat1)$y,density(dat2)$y,density(dat3)$y,density(dat4)$y)
-  mxmax=max(density(dat0)$x,density(dat1)$x,density(dat2)$x,density(dat3)$x,density(dat4)$x)
-  title="Time elapsed dists"
-  plot(density(dat0),col="red",ylim=c(0,mymax+0.01),xlim=c(0,mxmax),main=title)
-  lines(density(dat1), col="blue")
-  lines(density(dat2),col="green")
-  lines(density(dat3),col="brown")
-  lines(density(dat4),col="orange")
-  legend("topright",legend=c("Work","Eat","Relax","WC","Social"),
-         col=c("red","blue","green","brown","orange"),lty=1)
-  
-  mtext(paste("Agent ", toString(a), " summary", sep=""), outer=TRUE, cex=1.5)
-}
-
-
-#show distributions of time in state for all agents
-showtimedists <-function(){   
-  par(mfrow=c(1,1))
-  data = list()
-  for(a in 1:numagents){
-    da=table(factor(state_h_data[[a]],levels=c(-10,0,1,2,3,4)))/total_time
-    data[length(data)+1] = list(da)
-  }
-  ordata = do.call(rbind,data)
-  mymax=max(density(ordata[,1])$y,density(ordata[,2])$y,density(ordata[,3])$y,
-            density(ordata[,4])$y,density(ordata[,5])$y,density(ordata[,6])$y)
-  mxmax=max(density(ordata[,1])$x,density(ordata[,2])$x,density(ordata[,3])$x,
-            density(ordata[,4])$x,density(ordata[,5])$x,density(ordata[,6])$x)
-  title="Distributions of time in state (all agents)"
-  plot(density(ordata[,1]),col="red",ylim=c(0,mymax+0.001),xlim=c(0,mxmax),main=title)
-  lines(density(ordata[,2]), col="blue")
-  lines(density(ordata[,3]), col="green")
-  lines(density(ordata[,4]), col="brown")
-  lines(density(ordata[,5]), col="orange")
-  lines(density(ordata[,6]), col="black")
-  legend("topright",legend=c("Move","Work","Eat","Relax","WC","Social"),
-         col=c("red","blue","green","brown","orange","black"),lty=1)
-}
-
-# make new network
-#age = the number of time steps passed since the vertex is added. Vertex age is divided into aging bins
-#vconnect
-
-newnetwork <- function(numnodes, vertcon, ageexp, agebins){
-  g1 <- sample_pa_age(numnodes, pa.exp=1, aging.exp=ageexp, aging.bin=agebins, m = vertcon)
-}

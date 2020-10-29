@@ -25,6 +25,7 @@ total_time = (c(read_excel(mynet,5)[[1]]))              #length of the day
 numagents = (c(read_excel(mynet,5)[[2]]))               #number of agents
 num_days = (c(read_excel(mynet,5)[[3]]))                #number of days to run
 alpha = (c(read_excel(mynet,5)[[4]]))                   #learning rate
+attrade = (c(read_excel(mynet,5)[[5]]))                 #attractiveness/distance tradeoff
 
 foodpersmean = (c(read_excel(mynet,4)[[2]][3]))             #Mean of foodiness
 foodperssd = (c(read_excel(mynet,4)[[3]][3]))               #SD of foodiness

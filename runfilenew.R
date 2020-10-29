@@ -11,11 +11,11 @@ initialize()
 for (d in 1:num_days){            #iterate over days
   initializeday()
   
-  #things remembered across days go here !!!!!!!!!!!!!!!!!!!!
+  #[things to be remembered across days would go here]
   
   for (t in 1:total_time){         # iterate over the day
     
-    dosr()  #manage social dynamics
+    dosr(d, t)  #manage social dynamics
     
     for (a in 1:numagents){        # iterate over agents
       
@@ -122,6 +122,7 @@ for (d in 1:num_days){            #iterate over days
     statehistory[length(statehistory)+1] = list(agentstates)
     nodehistory[length(nodehistory)+1] = list(nodeloci) 
     thistory[length(thistory)+1] = list(telapsed)
+    haphistory[length(haphistory)+1] = list(happiness)
   }
 }
 
@@ -131,19 +132,21 @@ for (d in 1:num_days){            #iterate over days
 personastate_h_data <- as.data.frame(t(as.data.frame(statehistory, col.names=0:total_time+1, optional = TRUE)))
 node_h_data <- as.data.frame(t(as.data.frame(nodehistory, col.names=0:total_time+1, optional = TRUE)))
 te_h_data <- as.data.frame(t(as.data.frame(thistory, col.names=0:total_time+1, optional = TRUE)))
-haps_h_data <- as.data.frame(t(as.data.frame(happiness, col.names=0:total_time+1, optional = TRUE)))
+haps_h_data <- as.data.frame(t(as.data.frame(haphistory, col.names=0:total_time+1, optional = TRUE)))
+att_h_data <- as.data.frame(t(as.data.frame(atthistory, col.names=0:total_time+1, optional = TRUE)))
+
 
 for(i in 1:numagents){   #append workstation to personality (for reference)
   personality[[i]][length(personality[[i]])+1] = workstation[[i]]
 }
 pers_data <- as.data.frame(t(as.data.frame(personality, col.names=1:numagents, optional = TRUE)))
 
-setwd("C:/Research/projects/Jovan model/sims")
-freenum = (length(list.files())/4) + 1
+
+freenum = (length(list.files(pattern = "\\.csv$", ignore.case=TRUE))/6) + 1
 myname = paste("_N",toString(numagents),"_P",toString(personsd),"_",toString(freenum),".csv",sep="")
 write.table(state_h_data, file = paste("state", myname, sep=""), sep=",")
 write.table(node_h_data, file = paste("node", myname, sep=""), sep=",")
 write.table(te_h_data, file = paste("te", myname, sep=""), sep=",")
 write.table(pers_data, file = paste("pers", myname, sep=""), sep=",")
 write.table(haps_h_data, file = paste("haps", myname, sep=""), sep=",")
-setwd("C:/Research/projects/Jovan model")
+write.table(att_h_data, file = paste("atts", myname, sep=""), sep=",")
