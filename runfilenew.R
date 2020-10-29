@@ -131,6 +131,7 @@ for (d in 1:num_days){            #iterate over days
 personastate_h_data <- as.data.frame(t(as.data.frame(statehistory, col.names=0:total_time+1, optional = TRUE)))
 node_h_data <- as.data.frame(t(as.data.frame(nodehistory, col.names=0:total_time+1, optional = TRUE)))
 te_h_data <- as.data.frame(t(as.data.frame(thistory, col.names=0:total_time+1, optional = TRUE)))
+haps_h_data <- as.data.frame(t(as.data.frame(happiness, col.names=0:total_time+1, optional = TRUE)))
 
 for(i in 1:numagents){   #append workstation to personality (for reference)
   personality[[i]][length(personality[[i]])+1] = workstation[[i]]
@@ -144,4 +145,5 @@ write.table(state_h_data, file = paste("state", myname, sep=""), sep=",")
 write.table(node_h_data, file = paste("node", myname, sep=""), sep=",")
 write.table(te_h_data, file = paste("te", myname, sep=""), sep=",")
 write.table(pers_data, file = paste("pers", myname, sep=""), sep=",")
+write.table(haps_h_data, file = paste("haps", myname, sep=""), sep=",")
 setwd("C:/Research/projects/Jovan model")
