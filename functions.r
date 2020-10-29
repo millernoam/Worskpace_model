@@ -145,6 +145,7 @@ initialize <- function(){
   agentnodeatt <<- list() #node attractiveness for each agent
   blanklist = list(0)     #a blank list
   
+  haphistory <<- list()
   thistory <<- list()     #history of telapsed
   statehistory <<- c()   #history of agent states
   nodehistory <<- c()    #history of agent positions
@@ -172,6 +173,7 @@ initialize <- function(){
   statehistory[length(statehistory)+1] <<- list(agentstates)
   nodehistory[length(nodehistory)+1] <<- list(nodeloci)
   thistory[length(thistory)+1] <<- list(telapsed)
+  haphistory[length(haphistory)+1] <<- list(happiness)
   
   perscdf <<- makecdf(socpersmean, socperssd)
 }
@@ -479,4 +481,12 @@ showtimedists <-function(){
   lines(density(ordata[,6]), col="black")
   legend("topright",legend=c("Move","Work","Eat","Relax","WC","Social"),
          col=c("red","blue","green","brown","orange","black"),lty=1)
+}
+
+# make new network
+#age = the number of time steps passed since the vertex is added. Vertex age is divided into aging bins
+#vconnect
+
+newnetwork <- function(numnodes, vertcon, ageexp, agebins){
+  g1 <- sample_pa_age(numnodes, pa.exp=1, aging.exp=ageexp, aging.bin=agebins, m = vertcon)
 }
