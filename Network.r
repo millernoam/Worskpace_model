@@ -12,7 +12,7 @@ F1 <- data.matrix(floorPlan)  #convert data into matrix
 F1Graph <- graph_from_adjacency_matrix(F1)
 
 #read in node attractiveness list
-node_attractiveness<<-c(read_xlsx(mynet, 1)[[3]])  #list of node attractiveness
+node_attractiveness <<- c(read_xlsx(mynet, 1)[[3]])  #list of node attractiveness
 
 #read in other parameters
 ws_spots = na.omit(c(read_excel(mynet,3)[[1]]))        #list of workstations

@@ -11,13 +11,11 @@ initialize()
 for (d in 1:num_days){            #iterate over days
   initializeday()
   
-  #[things to be remembered across days would go here]
-  
   for (t in 1:total_time){         # iterate over the day
     
     dosr(d, t)  #manage social dynamics
     
-    for (a in 1:numagents){        # iterate over agents
+    for (a in 1:numagents){        # iterate over agents 
       
       curhunger[[a]] = curhunger[[a]] + runif(1)    #get hungrier
       curbladder[[a]] = curbladder[[a]] + runif(1)  #bladder fills
@@ -37,7 +35,7 @@ for (d in 1:num_days){            #iterate over days
       
       
       if(nodeloci[[a]] %in% kitchen_spots && agentstates[[a]] != -10){    # if in the kitchen
-        curhunger[[a]] = 0   #reset hunger
+        curhunger[[a]] = 0    #reset hunger
       } else if(nodeloci[[a]] %in% wc_spots && agentstates[[a]] != -10){  # if in the washroom
         curbladder[[a]] = 0   #empty bladder
       }
@@ -51,7 +49,7 @@ for (d in 1:num_days){            #iterate over days
       if(nodeloci[[a]] %notin% kitchen_spots && agentstates[[a]] == 1){   #if not @ kitchen & eating
         agentstates[[a]] = -10                                #then: go to kitchen
         for(p in 1:length(kitchen_spots)){                    #iterate over kitchen spots
-          attlone(nodeloci[[a]], kitchen_spots[[p]])          #find attractiveness of all paths
+          attlone(nodeloci[[a]], kitchen_spots[[p]], a)       #find attractiveness of all paths
         }                                      
         bestpath <- sort(attlist, decreasing = T)[1]          #find best path
         mypath <- pathlist[[which(attlist == bestpath)]]
@@ -61,7 +59,7 @@ for (d in 1:num_days){            #iterate over days
       if(nodeloci[[a]] %notin% wc_spots && agentstates[[a]]==3){   #if not @ WC & peeing
         agentstates[[a]] = -10                        #then: go to WC
         for(p in 1:length(wc_spots)){              #iterate over washroom spots
-          attlone(nodeloci[[a]], wc_spots[[p]])  #find attractiveness of all paths
+          attlone(nodeloci[[a]], wc_spots[[p]], a)  #find attractiveness of all paths
         }                                      
         bestpath <- sort(attlist, decreasing = T)[1]       #find best path
         mypath <- pathlist[[which(attlist == bestpath)]]
@@ -70,8 +68,8 @@ for (d in 1:num_days){            #iterate over days
       
       if(nodeloci[[a]] %notin% sr_spots && agentstates[[a]]==2){   #if not @ relax & relaxing
         agentstates[[a]] = -10                        #then: go to relax
-        for(p in 1:length(sr_spots)){              #iterate over relax spots
-          attlone(nodeloci[[a]], sr_spots[[p]])  #find attractiveness of all paths
+        for(p in 1:length(sr_spots)){               #iterate over relax spots
+          attlone(nodeloci[[a]], sr_spots[[p]], a)  #find attractiveness of all paths
         }                                      
         bestpath <- sort(attlist, decreasing = T)[1]       #find best path
         mypath <- pathlist[[which(attlist == bestpath)]]
@@ -81,13 +79,13 @@ for (d in 1:num_days){            #iterate over days
       if(nodeloci[[a]] %notin% sr_spots && agentstates[[a]]==4){   #if not @ social & social
         agentstates[[a]] = -10                        #then: go to socializing spot
         for(p in 1:length(sr_spots)){              #iterate over soc spots
-          attlone(nodeloci[[a]], sr_spots[[p]])  #find attractiveness of all paths
+          attlone(nodeloci[[a]], sr_spots[[p]], a)  #find attractiveness of all paths
         }                                                  
         bestpath <- sort(attlist, decreasing = T)[1]       #find best path
         mypath <- pathlist[[which(attlist == bestpath)]]
         movepath(mypath,a,4)          #move along that path
       }
-      
+
       
       happy(a)  #update agent happiness
       
@@ -129,7 +127,7 @@ for (d in 1:num_days){            #iterate over days
 
 # --  save the data -----------------------------------
 
-personastate_h_data <- as.data.frame(t(as.data.frame(statehistory, col.names=0:total_time+1, optional = TRUE)))
+state_h_data <- as.data.frame(t(as.data.frame(statehistory, col.names=0:total_time+1, optional = TRUE)))
 node_h_data <- as.data.frame(t(as.data.frame(nodehistory, col.names=0:total_time+1, optional = TRUE)))
 te_h_data <- as.data.frame(t(as.data.frame(thistory, col.names=0:total_time+1, optional = TRUE)))
 haps_h_data <- as.data.frame(t(as.data.frame(haphistory, col.names=0:total_time+1, optional = TRUE)))
@@ -142,6 +140,8 @@ for(i in 1:numagents){   #append workstation to personality (for reference)
 pers_data <- as.data.frame(t(as.data.frame(personality, col.names=1:numagents, optional = TRUE)))
 
 
+setwd(paste0(getwd(), "/sims"))
+
 freenum = (length(list.files(pattern = "\\.csv$", ignore.case=TRUE))/6) + 1
 myname = paste("_N",toString(numagents),"_P",toString(personsd),"_",toString(freenum),".csv",sep="")
 write.table(state_h_data, file = paste("state", myname, sep=""), sep=",")
@@ -150,3 +150,6 @@ write.table(te_h_data, file = paste("te", myname, sep=""), sep=",")
 write.table(pers_data, file = paste("pers", myname, sep=""), sep=",")
 write.table(haps_h_data, file = paste("haps", myname, sep=""), sep=",")
 write.table(att_h_data, file = paste("atts", myname, sep=""), sep=",")
+
+setwd(mydir)
+

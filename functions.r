@@ -1,35 +1,31 @@
 #This script stores all the functions
 
-
+#temporary functions for debugging:  -----------------------------------------
 #gives the probabilities for testing, for one agent at one time in one state
 giveprob <- function(time, tspent, person, blad, hung, state){  
-  cm=makeprobs(time,tspent,person,blad,hung)
+  cm = makeprobs(time, tspent, person, blad, hung)
   output = cm[ ,state+1]/sum(cm[ ,state+1])
   return(zapsmall(output,3))
 }
-
-
 #gives the matrix for testing, [not normalized!]
 giveallprob <- function(time, tspent, person, blad, hung){  
   cm=makeprobs(time,tspent,person,blad,hung)
   return(zapsmall(cm,4))
 }
-
-
 #just like pickapath, but returns the path rather than attaching it to 
 #any agent. For testing purposes. no agent or endstate needed.
-givepath <- function(startnode, endnode){
-  paths <<- all_simple_paths(floorG, from = names(floor)[[startnode]], to = names(floor)[[endnode]]) #all possible simple paths
+givepath <- function(startnode, endnode, me){
+  paths <<- all_simple_paths(F1Graph, from = names(floorPlan)[[startnode]], to = names(floorPlan)[[endnode]]) #all possible simple paths
   attractiveness <<- rep(NA, length = length(paths)) #empty list for path attractiveness
   
   for (i in 1:length(paths)){  # iterate over paths
     attractiveness[[i]] <- 100  #all start w att = 100
-    for (n in 1:length(nodeatt)){  #iterate over all possible nodes
+    for (n in 1:length(agentnodeatt[[me]])){  #iterate over all possible nodes
       if (is.element(toString(n), paths[[i]]) == TRUE){  #adjust attractiveness of path
-        attractiveness[[i]] = attractiveness[[i]] + nodeatt[[n]]
+        attractiveness[[i]] = attractiveness[[i]] + agentnodeatt[[me]][[n]]
       }
     }
-    attractiveness[[i]] = attractiveness[[i]] - (length(paths[[i]]) * 3)  # att -= length of path x 3
+    attractiveness[[i]] = attractiveness[[i]] - (length(paths[[i]]) * attrade)  # att -= length of path x 3
   }
   
   bestpath <<- sort(attractiveness, decreasing = T)[1]  #most attractive path
@@ -40,11 +36,11 @@ givepath <- function(startnode, endnode){
   }
   return(unlist(pathbynums))
 }
-
+#---------------------------------------------------------------------------
 
 #shows the shortest path from startnode to endnode
 showapath <- function(startnode, endnode){
-  short <- all_shortest_paths(floorG, from = names(floor)[[startnode]], to = names(floor)[[endnode]])    # Shortest path from the startnode to the endnode
+  short <- all_shortest_paths(F1Graph, from = names(floorPlan)[[startnode]], to = names(floorPlan)[[endnode]])    # Shortest path from the startnode to the endnode
   mypath = short$res[[1]]  # agent's path is the first shortest one
   pathbynums <- vector(mode = "list", length = length(mypath))    # create vector list with the length of agents' path
   for (i in 1:length(mypath)){                           # iterate through the path
@@ -58,7 +54,7 @@ showapath <- function(startnode, endnode){
 movepath <- function(mypath, me, endstate){
   pathbynums <- vector(mode = "list", length = length(mypath))  #vector for path
   for (j in 1:length(mypath)){                                  # iterate through the path
-    pathbynums[[j]] = which(colnames(floor)==mypath[[j]]$name) # add node numbers to list
+    pathbynums[[j]] = which(colnames(floorPlan)==mypath[[j]]$name) # add node numbers to list
   }
   pathbynums[length(pathbynums)+1] = endstate  # add endstate @ end of path
   agentpaths[[me]] <<- pathbynums # add path to agentpaths for this agent
@@ -66,19 +62,20 @@ movepath <- function(mypath, me, endstate){
 
 
 #find the most attractive path from startnode to endnode
-attlone <- function(startnode, endnode){
+attlone <- function(startnode, endnode, me){
   attlist <<- list()
   pathlist <<- list()
-  paths <<- all_simple_paths(floorG, from = names(floor)[[startnode]], to = names(floor)[[endnode]]) #all possible simple paths
+  paths <<- all_simple_paths(F1Graph, from = names(floorPlan)[[startnode]], to = names(floorPlan)[[endnode]]) #all possible simple paths
   attractiveness <<- rep(NA, length = length(paths)) #empty list for path attractiveness
+  myattvalues = agentnodeatt[[me]]
   for (i in 1:length(paths)){  # iterate over paths
     attractiveness[[i]] <- 100  #all start w att = 100
-    for (n in 1:length(nodeatt)){  #iterate over all possible nodes
+    for (n in 1:length(myattvalues)){  #iterate over all possible nodes
       if (is.element(toString(n), paths[[i]]) == TRUE){  #adjust attractiveness of path
-        attractiveness[[i]] = attractiveness[[i]] + nodeatt[[n]]
+        attractiveness[[i]] = attractiveness[[i]] + myattvalues[[n]]
       }
     }
-    attractiveness[[i]] = attractiveness[[i]] - (length(paths[[i]]) * 3)  # att -= length of path x 3
+    attractiveness[[i]] = attractiveness[[i]] - (length(paths[[i]]) * attrade)  # att -= length of path x 3
   }
   pathlist <- append(pathlist, paths)
   attlist <- append(attlist, attractiveness)
@@ -90,27 +87,29 @@ attlone <- function(startnode, endnode){
 #places path as a vector of nodes (with endstate @ the end) into agentpaths
 #[returns nothing]
 pickapath <- function(startnode, endnode, me, endstate){
-  paths <<- all_simple_paths(floorG, from = names(floor)[[startnode]], to = names(floor)[[endnode]]) #all possible simple paths
+  paths <<- all_simple_paths(F1Graph, from = names(floorPlan)[[startnode]], to = names(floorPlan)[[endnode]]) #all possible simple paths
   attractiveness <<- rep(NA, length = length(paths)) #empty list for path attractiveness
+  myattvalues = agentnodeatt[[me]]              #my attraction to each node
   
-  for (i in 1:length(paths)){  # iterate over paths
-    attractiveness[[i]] <- 100  #all start w att = 100
-    for (n in 1:length(nodeatt)){  #iterate over all possible nodes
-      if (is.element(toString(n), paths[[i]]) == TRUE){  #adjust attractiveness of path
-        attractiveness[[i]] = attractiveness[[i]] + nodeatt[[n]]
+  for (i in 1:length(paths)){                    #iterate over all possible paths
+    attractiveness[[i]] <- 100                   #all paths with attraction = 100
+    for (n in 1:length(myattvalues)){            #add each node's attractiveness... 
+      if (is.element(toString(n), paths[[i]]) == TRUE){  #...that is in the path
+        attractiveness[[i]] = attractiveness[[i]] + myattvalues[[n]]
       }
     }
-    attractiveness[[i]] = attractiveness[[i]] - (length(paths[[i]]) * attrade)  # att -= length of path x 3
+    # longer paths are less attractive. each extra node -= attrade
+    attractiveness[[i]] = attractiveness[[i]] - (length(paths[[i]]) * attrade)  
   }
   
   bestpath <<- sort(attractiveness, decreasing = T)[1]  #most attractive path
   mypath <<- paths[[which(attractiveness == bestpath)]]
-  pathbynums <- vector(mode = "list", length = length(mypath))  #vector for path
-  for (j in 1:length(mypath)){                                  # iterate through the path
-    pathbynums[[j]] = which(colnames(floor)==mypath[[j]]$name) # add node numbers to list
+  pathbynums <- vector(mode = "list", length = length(mypath))  #path as a vector
+  for (j in 1:length(mypath)){                                  #iterate through the path
+    pathbynums[[j]] = which(colnames(floor)==mypath[[j]]$name)  #add nodes to list
   }
-  pathbynums[length(pathbynums)+1] = endstate  # add endstate @ end of path
-  agentpaths[[me]] <<- pathbynums # add path to agentpaths for this agent
+  pathbynums[length(pathbynums)+1] = endstate                  #add endstate @ end of path
+  agentpaths[[me]] <<- pathbynums                              #assign path to agent
 }
 
 
@@ -131,24 +130,22 @@ initializeday <- function(){
     curhunger <<- c(curhunger, 0)                         #not hungry
     nodeloci <<- c(nodeloci, sample(out_spots,1))         #start outside
   }
+  
+  #fill in initial states into histories
+  statehistory[length(statehistory)+1] <<- list(agentstates)
+  nodehistory[length(nodehistory)+1] <<- list(nodeloci)
+  thistory[length(thistory)+1] <<- list(telapsed)
 }
 
 
-#Initializes the model; sets everything up
+#Initializes the model; sets up one-time things
 initialize <- function(){
-  agentpaths <<- list()   #list of current path for each agent   
-  agentstates <<- c()     #list of current state of each agent
-  nodeloci <<- c()        #list of current position for each agent
-  telapsed <<- c()        #list of time elapsed for each agent
   workstation <<- sample(ws_spots,numagents,replace=T)  #work node for each agent
   personality <<- list()  #personality of each agent
-  curbladder <<- list()   #current bladder state of each agent
-  curhunger <<- list()    #current hunger level of each agent
   happiness <<- c()       #happiness of each agent
   agentnodeatt <<- list() #node attractiveness for each agent
-  blanklist = list(0)     #a blank list
   
-  haphistory <<- list()
+  haphistory <<- list()   #history of happiness
   thistory <<- list()     #history of telapsed
   statehistory <<- c()   #history of agent states
   nodehistory <<- c()    #history of agent positions
@@ -157,26 +154,15 @@ initialize <- function(){
   for(i in 1:numagents){        # for each agent:
     happiness <<- append(happiness, 0)                    #start happiness at 0
     agentnodeatt <<- append(agentnodeatt, list(node_attractiveness))  #attractiveness of nodes
-    agentpaths <<- append(agentpaths, blanklist)          #no current path
-    agentstates <<- c(agentstates, 0)                     #state = 0
-    telapsed <<- c(telapsed, 0)                           #tealpsed = 0
-    curbladder <<- c(curbladder, 0)                       #bladder empty
-    curhunger <<- c(curhunger, 0)                         #not hungry
-    nodeloci <<- c(nodeloci, sample(out_spots,1))         #start outside
     
     foodiness <- rnorm(1, mean = foodpersmean, sd = foodperssd)  #personality 
     sociability <- rnorm(1, mean = socpersmean, sd = socperssd)
     workethic <- rnorm(1, mean = workpersmean, sd = workperssd)
     bladsize <- rnorm(1, mean = bladpersmean, sd = bladperssd)
-    traits <- c(foodiness, sociability, workethic, bladsize)  
-    mylist <- list(traits)
-    personality[length(personality)+1] <<- mylist
+    traits <- list(c(foodiness, sociability, workethic, bladsize))
+    personality[length(personality)+1] <<- traits
   }
   
-  #fill in initial states into histories
-  statehistory[length(statehistory)+1] <<- list(agentstates)
-  nodehistory[length(nodehistory)+1] <<- list(nodeloci)
-  thistory[length(thistory)+1] <<- list(telapsed)
   haphistory[length(haphistory)+1] <<- list(happiness)
   
   perscdf <<- makecdf(socpersmean, socperssd)
