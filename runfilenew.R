@@ -139,7 +139,7 @@ for(i in 1:numagents){   #append workstation to personality (for reference)
 }
 pers_data <- as.data.frame(t(as.data.frame(personality, col.names=1:numagents, optional = TRUE)))
 
-
+attcols = c("Day","Time","Agent","Node","delta","value")
 setwd(paste0(getwd(), "/sims"))
 
 freenum = (length(list.files(pattern = "\\.csv$", ignore.case=TRUE))/6) + 1
@@ -149,7 +149,7 @@ write.table(node_h_data, file = paste(myname,"node.csv", sep=""), sep=",", col.n
 write.table(te_h_data, file = paste(myname,"te.csv",  sep=""), sep=",", col.names=NA)
 write.table(pers_data, file = paste(myname,"pers.csv",  sep=""), sep=",", col.names=NA)
 write.table(haps_h_data, file = paste(myname,"haps.csv",  sep=""), sep=",", col.names=NA)
-write.table(att_h_data, file = paste(myname,"atts.csv",  sep=""), sep=",", col.names=NA)
+write.table(att_h_data, file = paste(myname,"atts.csv",  sep=""), sep=",", col.names=attcols, row.names=FALSE)
 
 setwd(mydir)
 

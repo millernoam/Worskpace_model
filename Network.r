@@ -15,11 +15,17 @@ F1Graph <- graph_from_adjacency_matrix(F1)
 node_attractiveness <<- c(read_xlsx(mynet, 1)[[3]])  #list of node attractiveness
 
 #read in other parameters
-ws_spots = na.omit(c(read_excel(mynet,3)[[1]]))        #list of workstations
-kitchen_spots = na.omit(c(read_excel(mynet,3)[[2]]))    #kitchen
-sr_spots = na.omit(c(read_excel(mynet,3)[[3]]))        #socializing/relaxing spots
-wc_spots = na.omit(c(read_excel(mynet,3)[[4]]))         #washroom
-out_spots = na.omit(c(read_excel(mynet,3)[[5]]))       #outside spots
+ws_spots = c(read_excel(mynet,3)[[1]])        #list of workstations
+kitchen_spots = c(read_excel(mynet,3)[[2]])    #kitchen
+sr_spots = c(read_excel(mynet,3)[[3]])        #socializing/relaxing spots
+wc_spots = c(read_excel(mynet,3)[[4]])       #washroom
+out_spots = c(read_excel(mynet,3)[[5]])       #outside spots
+ 
+ws_spots = ws_spots[!is.na(ws_spots)]
+kitchen_spots = kitchen_spots[!is.na(kitchen_spots)]
+sr_spots = sr_spots[!is.na(sr_spots)]
+wc_spots = wc_spots[!is.na(wc_spots)]
+out_spots = out_spots[!is.na(out_spots)]
 
 total_time = (c(read_excel(mynet,5)[[1]]))              #length of the day
 numagents = (c(read_excel(mynet,5)[[2]]))               #number of agents
