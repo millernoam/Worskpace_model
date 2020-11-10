@@ -5,4 +5,4 @@ setwd(mydir)
 source("Network.R")
 source("functions.R")
 
-lapply(1:1, function(n)source("runfilenew.R"))
+lapply(1:2, function(n)source("runfilenew.R"))

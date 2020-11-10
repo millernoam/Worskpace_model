@@ -1,43 +1,5 @@
 #This script stores all the functions
 
-#temporary functions for debugging:  -----------------------------------------
-#gives the probabilities for testing, for one agent at one time in one state
-giveprob <- function(time, tspent, person, blad, hung, state){  
-  cm = makeprobs(time, tspent, person, blad, hung)
-  output = cm[ ,state+1]/sum(cm[ ,state+1])
-  return(zapsmall(output,3))
-}
-#gives the matrix for testing, [not normalized!]
-giveallprob <- function(time, tspent, person, blad, hung){  
-  cm=makeprobs(time,tspent,person,blad,hung)
-  return(zapsmall(cm,4))
-}
-#just like pickapath, but returns the path rather than attaching it to 
-#any agent. For testing purposes. no agent or endstate needed.
-givepath <- function(startnode, endnode, me){
-  paths <<- all_simple_paths(F1Graph, from = names(floorPlan)[[startnode]], to = names(floorPlan)[[endnode]]) #all possible simple paths
-  attractiveness <<- rep(NA, length = length(paths)) #empty list for path attractiveness
-  
-  for (i in 1:length(paths)){  # iterate over paths
-    attractiveness[[i]] <- 100  #all start w att = 100
-    for (n in 1:length(agentnodeatt[[me]])){  #iterate over all possible nodes
-      if (is.element(toString(n), paths[[i]]) == TRUE){  #adjust attractiveness of path
-        attractiveness[[i]] = attractiveness[[i]] + agentnodeatt[[me]][[n]]
-      }
-    }
-    attractiveness[[i]] = attractiveness[[i]] - (length(paths[[i]]) * attrade)  # att -= length of path x 3
-  }
-  
-  bestpath <<- sort(attractiveness, decreasing = T)[1]  #most attractive path
-  mypath <<- paths[[which(attractiveness == bestpath)]]
-  pathbynums <- vector(mode = "list", length = length(mypath))  #vector for path
-  for (j in 1:length(mypath)){                                  # iterate through the path
-    pathbynums[[j]] = which(colnames(floor)==mypath[[j]]$name) # add node numbers to list
-  }
-  return(unlist(pathbynums))
-}
-#---------------------------------------------------------------------------
-
 `%notin%` <- Negate(`%in%`)
 
 #shows the shortest path from startnode to endnode
@@ -105,7 +67,7 @@ pickapath <- function(startnode, endnode, me, endstate){
   }
   
   bestpath <<- sort(attractiveness, decreasing = T)[1]  #most attractive path
-  mypath <<- paths[[which(attractiveness == bestpath)]]
+  mypath <<- paths[[which(attractiveness == bestpath)[1]]]
   pathbynums <- vector(mode = "list", length = length(mypath))  #path as a vector
   for (j in 1:length(mypath)){                                  #iterate through the path
     pathbynums[[j]] = which(colnames(floorPlan)==mypath[[j]]$name)  #add nodes to list

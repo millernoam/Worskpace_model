@@ -48,41 +48,57 @@ for (d in 1:num_days){            #iterate over days
       
       if(nodeloci[[a]] %notin% kitchen_spots && agentstates[[a]] == 1){   #if not @ kitchen & eating
         agentstates[[a]] = -10                                #then: go to kitchen
+        maxatt = -100
         for(p in 1:length(kitchen_spots)){                    #iterate over kitchen spots
           attlone(nodeloci[[a]], kitchen_spots[[p]], a)       #find attractiveness of all paths
+          bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
+          if(bestpath > maxatt){                                #if better than older ones
+            maxatt = bestpath
+            mypath <- pathlist[[which(attlist == bestpath)[1]]]   #go there. TEMP SOLUTION!!!!!
+          }
         }                                      
-        bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
-        mypath <- pathlist[[which(attlist == bestpath)[1]]]   #TEMP SOLUTION!!!!!!!!!!!!!!!!!!!!
         movepath(mypath,a,1)                                  #move along that path
       }
       
       if(nodeloci[[a]] %notin% wc_spots && agentstates[[a]]==3){   #if not @ WC & peeing
         agentstates[[a]] = -10                        #then: go to WC
+        maxatt = -100
         for(p in 1:length(wc_spots)){              #iterate over washroom spots
           attlone(nodeloci[[a]], wc_spots[[p]], a)  #find attractiveness of all paths
+          bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
+          if(bestpath > maxatt){                                #if better than older ones
+            maxatt = bestpath
+            mypath <- pathlist[[which(attlist == bestpath)[1]]]   #go there. TEMP SOLUTION!!!!!
+          }
         }                                      
-        bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
-        mypath <- pathlist[[which(attlist == bestpath)[1]]]   #TEMP SOLUTION!!!!!!!!!!!!!!!!!!!!
         movepath(mypath,a,3)          #move along that path
       }
       
       if(nodeloci[[a]] %notin% sr_spots && agentstates[[a]]==2){   #if not @ relax & relaxing
         agentstates[[a]] = -10                        #then: go to relax
+        maxatt = -100
         for(p in 1:length(sr_spots)){               #iterate over relax spots
           attlone(nodeloci[[a]], sr_spots[[p]], a)  #find attractiveness of all paths
+          bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
+          if(bestpath > maxatt){                                #if better than older ones
+            maxatt = bestpath
+            mypath <- pathlist[[which(attlist == bestpath)[1]]]   #go there. TEMP SOLUTION!!!!!
+          }
         }                                      
-        bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
-        mypath <- pathlist[[which(attlist == bestpath)[1]]]   #TEMP SOLUTION!!!!!!!!!!!!!!!!!!!!
         movepath(mypath,a,2)          #move along that path
       }
       
       if(nodeloci[[a]] %notin% sr_spots && agentstates[[a]]==4){   #if not @ social & social
         agentstates[[a]] = -10                        #then: go to socializing spot
+        maxatt = -100
         for(p in 1:length(sr_spots)){              #iterate over soc spots
           attlone(nodeloci[[a]], sr_spots[[p]], a)  #find attractiveness of all paths
+          bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
+          if(bestpath > maxatt){                                #if better than older ones
+            maxatt = bestpath
+            mypath <- pathlist[[which(attlist == bestpath)[1]]]   #go there. TEMP SOLUTION!!!!!
+          }
         }                                                  
-        bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
-        mypath <- pathlist[[which(attlist == bestpath)[1]]]   #TEMP SOLUTION!!!!!!!!!!!!!!!!!!!!
         movepath(mypath,a,4)          #move along that path
       }
 
@@ -131,7 +147,7 @@ state_h_data <- as.data.frame(t(as.data.frame(statehistory, col.names=1:length(s
 node_h_data <- as.data.frame(t(as.data.frame(nodehistory, col.names=1:length(nodehistory), optional = TRUE)))
 te_h_data <- as.data.frame(t(as.data.frame(thistory, col.names=1:length(thistory), optional = TRUE)))
 haps_h_data <- as.data.frame(t(as.data.frame(haphistory, col.names=1:length(haphistory), optional = TRUE)))
-att_h_data <- as.data.frame(t(as.data.frame(atthistory,col.names=1:length(atthistory), optional = TRUE)))
+att_h_data <- as.data.frame(t(as.data.frame(atthistory,col.names=NA, optional = TRUE)))
 
 
 for(i in 1:numagents){   #append workstation to personality (for reference)
