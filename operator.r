@@ -1,5 +1,5 @@
 mydir <<- "C:/Research/projects/Jovan model/model2"  #enter the path to all files
-mynet <<- "network node codebook new.xlsx"              #enter file name for network
+mynet <<- "network node codebook.xlsx"              #enter file name for network
 
 setwd(mydir)
 source("Network.R")

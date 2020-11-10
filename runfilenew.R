@@ -51,8 +51,8 @@ for (d in 1:num_days){            #iterate over days
         for(p in 1:length(kitchen_spots)){                    #iterate over kitchen spots
           attlone(nodeloci[[a]], kitchen_spots[[p]], a)       #find attractiveness of all paths
         }                                      
-        bestpath <- sort(attlist, decreasing = T)[1]          #find best path
-        mypath <- pathlist[[which(attlist == bestpath)]]
+        bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
+        mypath <- pathlist[[which(attlist == bestpath)[1]]]   #TEMP SOLUTION!!!!!!!!!!!!!!!!!!!!
         movepath(mypath,a,1)                                  #move along that path
       }
       
@@ -61,8 +61,8 @@ for (d in 1:num_days){            #iterate over days
         for(p in 1:length(wc_spots)){              #iterate over washroom spots
           attlone(nodeloci[[a]], wc_spots[[p]], a)  #find attractiveness of all paths
         }                                      
-        bestpath <- sort(attlist, decreasing = T)[1]       #find best path
-        mypath <- pathlist[[which(attlist == bestpath)]]
+        bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
+        mypath <- pathlist[[which(attlist == bestpath)[1]]]   #TEMP SOLUTION!!!!!!!!!!!!!!!!!!!!
         movepath(mypath,a,3)          #move along that path
       }
       
@@ -71,8 +71,8 @@ for (d in 1:num_days){            #iterate over days
         for(p in 1:length(sr_spots)){               #iterate over relax spots
           attlone(nodeloci[[a]], sr_spots[[p]], a)  #find attractiveness of all paths
         }                                      
-        bestpath <- sort(attlist, decreasing = T)[1]       #find best path
-        mypath <- pathlist[[which(attlist == bestpath)]]
+        bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
+        mypath <- pathlist[[which(attlist == bestpath)[1]]]   #TEMP SOLUTION!!!!!!!!!!!!!!!!!!!!
         movepath(mypath,a,2)          #move along that path
       }
       
@@ -81,8 +81,8 @@ for (d in 1:num_days){            #iterate over days
         for(p in 1:length(sr_spots)){              #iterate over soc spots
           attlone(nodeloci[[a]], sr_spots[[p]], a)  #find attractiveness of all paths
         }                                                  
-        bestpath <- sort(attlist, decreasing = T)[1]       #find best path
-        mypath <- pathlist[[which(attlist == bestpath)]]
+        bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
+        mypath <- pathlist[[which(attlist == bestpath)[1]]]   #TEMP SOLUTION!!!!!!!!!!!!!!!!!!!!
         movepath(mypath,a,4)          #move along that path
       }
 
@@ -127,11 +127,11 @@ for (d in 1:num_days){            #iterate over days
 
 # --  save the data -----------------------------------
 
-state_h_data <- as.data.frame(t(as.data.frame(statehistory, col.names=0:total_time+1, optional = TRUE)))
-node_h_data <- as.data.frame(t(as.data.frame(nodehistory, col.names=0:total_time+1, optional = TRUE)))
-te_h_data <- as.data.frame(t(as.data.frame(thistory, col.names=0:total_time+1, optional = TRUE)))
-haps_h_data <- as.data.frame(t(as.data.frame(haphistory, col.names=0:total_time+1, optional = TRUE)))
-att_h_data <- as.data.frame(t(as.data.frame(atthistory, col.names=0:total_time+1, optional = TRUE)))
+state_h_data <- as.data.frame(t(as.data.frame(statehistory, col.names=1:length(statehistory), optional = TRUE)))
+node_h_data <- as.data.frame(t(as.data.frame(nodehistory, col.names=1:length(nodehistory), optional = TRUE)))
+te_h_data <- as.data.frame(t(as.data.frame(thistory, col.names=1:length(thistory), optional = TRUE)))
+haps_h_data <- as.data.frame(t(as.data.frame(haphistory, col.names=1:length(haphistory), optional = TRUE)))
+att_h_data <- as.data.frame(t(as.data.frame(atthistory,col.names=1:length(atthistory), optional = TRUE)))
 
 
 for(i in 1:numagents){   #append workstation to personality (for reference)
@@ -143,13 +143,13 @@ pers_data <- as.data.frame(t(as.data.frame(personality, col.names=1:numagents, o
 setwd(paste0(getwd(), "/sims"))
 
 freenum = (length(list.files(pattern = "\\.csv$", ignore.case=TRUE))/6) + 1
-myname = paste("_N",toString(numagents),"_P",toString(personsd),"_",toString(freenum),".csv",sep="")
-write.table(state_h_data, file = paste("state", myname, sep=""), sep=",")
-write.table(node_h_data, file = paste("node", myname, sep=""), sep=",")
-write.table(te_h_data, file = paste("te", myname, sep=""), sep=",")
-write.table(pers_data, file = paste("pers", myname, sep=""), sep=",")
-write.table(haps_h_data, file = paste("haps", myname, sep=""), sep=",")
-write.table(att_h_data, file = paste("atts", myname, sep=""), sep=",")
+myname = paste("R",toString(freenum),sep="")
+write.table(state_h_data, file = paste(myname,"state.csv", sep=""), sep=",", col.names=NA)
+write.table(node_h_data, file = paste(myname,"node.csv", sep=""), sep=",", col.names=NA)
+write.table(te_h_data, file = paste(myname,"te.csv",  sep=""), sep=",", col.names=NA)
+write.table(pers_data, file = paste(myname,"pers.csv",  sep=""), sep=",", col.names=NA)
+write.table(haps_h_data, file = paste(myname,"haps.csv",  sep=""), sep=",", col.names=NA)
+write.table(att_h_data, file = paste(myname,"atts.csv",  sep=""), sep=",", col.names=NA)
 
 setwd(mydir)
 
