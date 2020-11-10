@@ -24,7 +24,7 @@ for (d in 1:num_days){            #iterate over days
       if(agentstates[[a]] == -10){         # if moving, continue
         tosearch = agentpaths[[a]][1:length(agentpaths[[a]])-1]
         currspot = which(tosearch == nodeloci[[a]])   # current location of agent
-        if(currspot < (length(agentpaths[[a]])-1)){   # if current location smaller than length of path -1
+        if(currspot < length(agentpaths[[a]])-1){   # if current location smaller than length of path -1
           nodeloci[[a]] = agentpaths[[a]][[currspot+1]]      # keep moving
         } else {                                      # if not moving
           agentstates[[a]] = agentpaths[[a]][[currspot+1]]  #assign endstate
@@ -48,7 +48,7 @@ for (d in 1:num_days){            #iterate over days
       
       if(nodeloci[[a]] %notin% kitchen_spots && agentstates[[a]] == 1){   #if not @ kitchen & eating
         agentstates[[a]] = -10                                #then: go to kitchen
-        maxatt = -100
+        maxatt = -10000
         for(p in 1:length(kitchen_spots)){                    #iterate over kitchen spots
           attlone(nodeloci[[a]], kitchen_spots[[p]], a)       #find attractiveness of all paths
           bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
@@ -62,7 +62,7 @@ for (d in 1:num_days){            #iterate over days
       
       if(nodeloci[[a]] %notin% wc_spots && agentstates[[a]]==3){   #if not @ WC & peeing
         agentstates[[a]] = -10                        #then: go to WC
-        maxatt = -100
+        maxatt = -10000
         for(p in 1:length(wc_spots)){              #iterate over washroom spots
           attlone(nodeloci[[a]], wc_spots[[p]], a)  #find attractiveness of all paths
           bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
@@ -76,7 +76,7 @@ for (d in 1:num_days){            #iterate over days
       
       if(nodeloci[[a]] %notin% sr_spots && agentstates[[a]]==2){   #if not @ relax & relaxing
         agentstates[[a]] = -10                        #then: go to relax
-        maxatt = -100
+        maxatt = -10000
         for(p in 1:length(sr_spots)){               #iterate over relax spots
           attlone(nodeloci[[a]], sr_spots[[p]], a)  #find attractiveness of all paths
           bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path
@@ -90,7 +90,7 @@ for (d in 1:num_days){            #iterate over days
       
       if(nodeloci[[a]] %notin% sr_spots && agentstates[[a]]==4){   #if not @ social & social
         agentstates[[a]] = -10                        #then: go to socializing spot
-        maxatt = -100
+        maxatt = -10000
         for(p in 1:length(sr_spots)){              #iterate over soc spots
           attlone(nodeloci[[a]], sr_spots[[p]], a)  #find attractiveness of all paths
           bestpath <- sort(unlist(attlist), decreasing = T)[1]          #find best path

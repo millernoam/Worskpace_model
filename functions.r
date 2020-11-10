@@ -138,26 +138,26 @@ dosr <- function(d, t){
   
   tempstates <- c()  #temporary storage for new states
   
-  for(a in 1:numagents){  #for each agent
+  for(ag in 1:numagents){  #for each agent
     
-    if(nodeloci[[a]] %in% sr_spots){                    #if in an sr_spot
-      fellows <- which(nodeloci == nodeloci[[a]])         #who else is there?
+    if(nodeloci[[ag]] %in% sr_spots){                    #if in an sr_spot
+      fellows <- which(nodeloci == nodeloci[[ag]])         #who else is there?
       
-      if(agentstates[[a]] == 2){          #[if relaxing]
+      if(agentstates[[ag]] == 2){          #[if relaxing]
         
         if(length(fellows) == 1){                         #nobody but me, relax
           tempstates <- append(tempstates, 2)
-          agentnodeatt[[a]][nodeloci[[a]]] <<- agentnodeatt[[a]][nodeloci[[a]]] + alpha
+          agentnodeatt[[ag]][nodeloci[[ag]]] <<- agentnodeatt[[ag]][nodeloci[[ag]]] + alpha
           #record change in attractiveness: [day, time, agent#, node#, 1, new value]
-          atthistory[length(atthistory)+1] <<- list(c(d, t, a, nodeloci[[a]], 1, agentnodeatt[[a]][nodeloci[[a]]]))
+          atthistory[length(atthistory)+1] <<- list(c(d, t, ag, nodeloci[[ag]], 1, agentnodeatt[[ag]][nodeloci[[ag]]]))
           
         } else {                                          #somebody
           localchatters <- which(agentstates[fellows] == 4)  #are they social?
           if(length(localchatters == 0)){                      #no, relax
             tempstates <- append(tempstates, 2)
-            agentnodeatt[[a]][nodeloci[[a]]] <<- agentnodeatt[[a]][nodeloci[[a]]] + alpha
+            agentnodeatt[[ag]][nodeloci[[ag]]] <<- agentnodeatt[[ag]][nodeloci[[ag]]] + alpha
             #record change in attractiveness: [day, time, agent#, node#, 1, new value]
-            atthistory[length(atthistory)+1] <<- list(c(d, t, a, nodeloci[[a]], 1, agentnodeatt[[a]][nodeloci[[a]]]))
+            atthistory[length(atthistory)+1] <<- list(c(d, t, ag, nodeloci[[ag]], 1, agentnodeatt[[ag]][nodeloci[[ag]]]))
             
           } else {                                             #yes, MIX
             localrelaxers <- which(agentstates[fellows] == 2)  #others relaxing
@@ -173,47 +173,47 @@ dosr <- function(d, t){
             
             if(socialsum >= relaxsum){   #strongest force wins
               tempstates <- append(tempstates, 4)
-              agentnodeatt[[a]][nodeloci[[a]]] <<- agentnodeatt[[a]][nodeloci[[a]]] - alpha
+              agentnodeatt[[ag]][nodeloci[[ag]]] <<- agentnodeatt[[ag]][nodeloci[[ag]]] - alpha
               #record change in attractiveness: [day, time, agent#, node#, -1, new value]
-              atthistory[length(atthistory)+1] <<- list(c(d, t, a, nodeloci[[a]], -1, agentnodeatt[[a]][nodeloci[[a]]]))
+              atthistory[length(atthistory)+1] <<- list(c(d, t, ag, nodeloci[[ag]], -1, agentnodeatt[[ag]][nodeloci[[ag]]]))
               
             } else {
               tempstates <- append(tempstates, 2)
-              agentnodeatt[[a]][nodeloci[[a]]] <<- agentnodeatt[[a]][nodeloci[[a]]] + alpha
+              agentnodeatt[[ag]][nodeloci[[ag]]] <<- agentnodeatt[[ag]][nodeloci[[ag]]] + alpha
               #record change in attractiveness: [day, time, agent#, node#, 1, new value]
-              atthistory[length(atthistory)+1] <<- list(c(d, t, a, nodeloci[[a]], 1, agentnodeatt[[a]][nodeloci[[a]]]))
+              atthistory[length(atthistory)+1] <<- list(c(d, t, ag, nodeloci[[ag]], 1, agentnodeatt[[ag]][nodeloci[[ag]]]))
             }
           }
         }
         
-      } else if(agentstates[[a]] == 4){   #[if being social]
+      } else if(agentstates[[ag]] == 4){   #[if being social]
         
         if(length(fellows) == 1){                      #nobody but me
-          probleave = perscdf(personality[[a]][2])      #P(leave) ~ sociability
+          probleave = perscdf(personality[[ag]][2])      #P(leave) ~ sociability
           rando = runif(1)
           if(rando <= probleave){
             tempstates <- append(tempstates, -10)
-            agentnodeatt[[a]][nodeloci[[a]]] <<- agentnodeatt[[a]][nodeloci[[a]]] - alpha
+            agentnodeatt[[ag]][nodeloci[[ag]]] <<- agentnodeatt[[ag]][nodeloci[[ag]]] - alpha
             #record change in attractiveness: [day, time, agent#, node#, -1, new value]
-            atthistory[length(atthistory)+1] <<- list(c(d, t, a, nodeloci[[a]], -1, agentnodeatt[[a]][nodeloci[[a]]]))
+            atthistory[length(atthistory)+1] <<- list(c(d, t, ag, nodeloci[[ag]], -1, agentnodeatt[[ag]][nodeloci[[ag]]]))
             
             #choose another place to go to!!!!!!!!!!!!!!!
-            pickapath(nodeloci[[a]], workstation[[a]], a, 0) #stopgap: go back to desk & work
+            pickapath(nodeloci[[ag]], workstation[[ag]], ag, 0) #stopgap: go back to desk & work
             
           } else{
             tempstates <- append(tempstates, 2)     #don't leave, relax
-            agentnodeatt[[a]][nodeloci[[a]]] <<- agentnodeatt[[a]][nodeloci[[a]]] - alpha
+            agentnodeatt[[ag]][nodeloci[[ag]]] <<- agentnodeatt[[ag]][nodeloci[[ag]]] - alpha
             #record change in attractiveness: [day, time, agent#, node#, -1, new value]
-            atthistory[length(atthistory)+1] <<- list(c(d, t, a, nodeloci[[a]], -1, agentnodeatt[[a]][nodeloci[[a]]]))
+            atthistory[length(atthistory)+1] <<- list(c(d, t, ag, nodeloci[[ag]], -1, agentnodeatt[[ag]][nodeloci[[ag]]]))
           }
           
         } else {                                          #somebody
           localchatters <- which(agentstates[fellows] == 4)  #are they social?
           if(length(localchatters > 1)){          #yes (other than self), be social 
             tempstates <- append(tempstates, 4)
-            agentnodeatt[[a]][nodeloci[[a]]] <<- agentnodeatt[[a]][nodeloci[[a]]] + alpha
+            agentnodeatt[[ag]][nodeloci[[ag]]] <<- agentnodeatt[[ag]][nodeloci[[ag]]] + alpha
             #record change in attractiveness: [day, time, agent#, node#, 1, new value]
-            atthistory[length(atthistory)+1] <<- list(c(d, t, a, nodeloci[[a]], 1, agentnodeatt[[a]][nodeloci[[a]]]))
+            atthistory[length(atthistory)+1] <<- list(c(d, t, ag, nodeloci[[ag]], 1, agentnodeatt[[ag]][nodeloci[[ag]]]))
             
           } else {                                             #no, MIX
             localrelaxers <- which(agentstates[fellows] == 2)  #others relaxing
@@ -229,15 +229,15 @@ dosr <- function(d, t){
             
             if(socialsum >= relaxsum){   #strongest force wins
               tempstates <- append(tempstates, 4)
-              agentnodeatt[[a]][nodeloci[[a]]] <<- agentnodeatt[[a]][nodeloci[[a]]] + alpha
+              agentnodeatt[[ag]][nodeloci[[ag]]] <<- agentnodeatt[[ag]][nodeloci[[ag]]] + alpha
               #record change in attractiveness: [day, time, agent#, node#, 1, new value]
-              atthistory[length(atthistory)+1] <<- list(c(d, t, a, nodeloci[[a]], 1, agentnodeatt[[a]][nodeloci[[a]]]))
+              atthistory[length(atthistory)+1] <<- list(c(d, t, ag, nodeloci[[ag]], 1, agentnodeatt[[ag]][nodeloci[[ag]]]))
               
             } else {
               tempstates <- append(tempstates, 2)
-              agentnodeatt[[a]][nodeloci[[a]]] <<- agentnodeatt[[a]][nodeloci[[a]]] - alpha
+              agentnodeatt[[ag]][nodeloci[[ag]]] <<- agentnodeatt[[ag]][nodeloci[[ag]]] - alpha
               #record change in attractiveness: [day, time, agent#, node#, -1, new value]
-              atthistory[length(atthistory)+1] <<- list(c(d, t, a, nodeloci[[a]], -1, agentnodeatt[[a]][nodeloci[[a]]]))
+              atthistory[length(atthistory)+1] <<- list(c(d, t, ag, nodeloci[[ag]], -1, agentnodeatt[[ag]][nodeloci[[ag]]]))
             }
           }
         }
