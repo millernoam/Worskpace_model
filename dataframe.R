@@ -8,7 +8,7 @@ library(questionr)
 setwd("/Volumes/External SSD/Jovan sims/Jovan sims")                                     #set directory which should have your codebook handy
 chillspots <<- (read_excel("network node codebook n2.xlsx",3)[[3]])                      #extract chill spots from the codebook file
 chillspots <<- na.omit(chillspots)                                                       #omit NA's if there are any because columns in that sheet most likely have different lengths
-numagents = (c(read_excel("network node codebook n2.xlsx",5)[[2]]))                                                #number of agents
+numagents <<- (c(read_excel("network node codebook n2.xlsx",5)[[2]]))                                                #number of agents
 num_days <<- (read_excel("network node codebook n2.xlsx",5)[[3]])                        #extract number of days from the codebook
 tsperday <<- (read_excel("network node codebook n2.xlsx",5)[[1]])                        #extract timesteps per day from the codebook
 columns <<- c("Replication", "Agent", "Foodiness", "Sociability", "Work Ethic", "Bladder Size", "Workstation","Walking","Working","Eating","Relaxing","Washroom","Socializing","Happiness")                                                  #insert column names above into data frame
