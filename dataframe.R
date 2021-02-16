@@ -12,23 +12,28 @@ numagents <<- (c(read_excel("network node codebook n2.xlsx",5)[[2]]))           
 num_days <<- (read_excel("network node codebook n2.xlsx",5)[[3]])                        #extract number of days from the codebook
 tsperday <<- (read_excel("network node codebook n2.xlsx",5)[[1]])                        #extract timesteps per day from the codebook
 columns <<- c("Replication", "Agent", "Foodiness", "Sociability", "Work Ethic", "Bladder Size", "Workstation","Walking","Working","Eating","Relaxing","Washroom","Socializing","Happiness")                                                  #insert column names above into data frame
+df <- data.frame(matrix(ncol = 14))                                #create data frame of length columns(basic) and however many chill spots chosen in the codebook
+colnames(df) <- c(columns)  
+dfsr <- data.frame(matrix(ncol = length(chillspots)))
+colnames(dfsr) <- c(chillspots)
 
-dir = "/Volumes/External SSD/Jovan sims/Jovan sims/A3/N10_A3" 
+dir = "/Volumes/Macintosh HD/Users/jovanpoposki/Downloads/N10_A3" 
 setwd(dir)
 dataframe <- function(dir){
-  df = data.frame(matrix(ncol = 14))                                #create data frame of length columns(basic) and however many chill spots chosen in the codebook
-  colnames(df) <- c(columns)  
-  dfsr <- data.frame(matrix(ncol = length(chillspots)))
-  colnames(dfsr) <- c(chillspots)
+  
   hapsfiles <<- list.files(pattern = "haps")                    #list all happiness files
   persfiles <<- list.files(pattern = "pers")                    #list all personality files
   statefiles <<- list.files(pattern = "state")                  #list all state history files
   attsfiles <<- list.files(pattern = "atts")                    #list all s/r spot attractiveness files
+  hapsfiles <<- str_sort(hapsfiles, numeric = T)
+  persfiles <<- str_sort(persfiles, numeric = T)
+  statefiles <<- str_sort(statefiles, numeric = T)
+  attsfiles <<- str_sort(attsfiles, numeric = T)
   
 
   for(p in 1:length(persfiles)){                            
-    file <<- read.csv(persfiles[[p]])                               #choose file from pers files
-    file <<- file[-1]                                                #take first column out
+    file = read.csv(persfiles[[p]])                               #choose file from pers files
+    file = file[-1]                                                #take first column out
     
     
     for(r in 1:nrow(file)){
@@ -36,15 +41,15 @@ dataframe <- function(dir){
       df[nrow(na.omit(df[1]))+1,1] = p                          #take note of replication
       for(c in 1:5){
         
-        df[nrow(na.omit(df[c+2]))+1,c+2] = file[r,c]          #add personality of agents to data frame               
+      df[nrow(na.omit(df[c+2]))+1,c+2] = file[r,c]          #add personality of agents to data frame               
         
       }
     }
   }  
   for(h in 1:length(hapsfiles)){
-    file <<- read.csv(hapsfiles[[h]])                            #choose file from haps files
-    file <<- file[-1]                                            #take first column out
-    file <<- file[-1,]                                           #omit first row b/c there is an unever number of rows (2501)
+    file = read.csv(hapsfiles[[h]])                            #choose file from haps files
+    file = file[-1]                                            #take first column out
+    file = file[-1,]                                           #omit first row b/c there is an unever number of rows (2501)
 
     finalhaps = file[tsperday * num_days,]                     #put final row in vector
       
@@ -53,8 +58,8 @@ dataframe <- function(dir){
     }
   } 
   for(s in 1:length(statefiles)){
-    file <<- read.csv(statefiles[[s]])                               #choose file from state files
-    file <<- file[-1]                                                 #read in the file
+    file = read.csv(statefiles[[s]])                               #choose file from state files
+    file = file[-1]                                                 #read in the file
     
     for(f in 1:ncol(file)){                                        #iterate over the columns/agents
       agentstates <<- freq(file[[f]])                           #put agent's column in a vector
@@ -70,29 +75,29 @@ dataframe <- function(dir){
       else{                                                         #relax is included in these frequencies
         for(y in 1:6){
         df[nrow(na.omit(df[(y+7)]))+1,(y+7)] = agentstates[[1]][y]                #update walking
-          }
         }
-      }  
-    }
-for(o in 1:length(attsfiles)){
-  file <<- read.csv(attsfiles[[o]])                               #choose file from atts files
-  dftemp <- data.frame(matrix(ncol = length(chillspots), nrow = numagents))
-  colnames(dftemp) <- c(chillspots)
-  
-  for(j in length(file[[4]]):1){                            #iterate backwards on the column which displays the sr spot
-    spot <- which(chillspots %in% file[[4]][j])             #take note of index of spot
-    agent <- file[j,3]                                      #take note of agent at spot
-    if(is.na(dftemp[agent,spot]) == T){                      #is the cell with the agent and the chillspot empty?
-      dftemp[agent,spot] = file[j,6]                         #if so, note the final rating of that spot for that agent
-    }
-    if(anyMissing(as.matrix(dftemp)) == F){                  #as soon as all the cells are filled, the loop ends
-      break
-    }
+      }
+    }  
   }
-  dfsr <<- bind_rows(dftemp, dfsr)                 #append the data to its respective column in this data frame and keep adding
-  
-}
-  dfsr = dfsr[-1,]
+  for(o in 1:length(attsfiles)){
+    file = read.csv(attsfiles[[o]])                               #choose file from atts files
+    dftemp <- data.frame(matrix(ncol = length(chillspots), nrow = numagents))
+    colnames(dftemp) <- c(chillspots)
+    
+    for(j in length(file[[4]]):1){                            #iterate backwards on the column which displays the sr spot
+      spot <<- which(chillspots %in% file[[4]][j])             #take note of index of spot
+      agent <<- file[j,3]                                      #take note of agent at spot
+      if(is.na(dftemp[agent,spot]) == T){                      #is the cell with the agent and the chillspot index empty?
+        dftemp[agent,spot] = file[j,6]                         #if so, note the final rating of that spot for that agent
+      }
+      if(anyMissing(as.matrix(dftemp)) == F){                  #as soon as all the cells are filled, the loop ends
+        break
+      }
+    }
+    dfsr <<- bind_rows(dfsr, dftemp)                 #append the data to its respective column in this data frame and keep adding
+    
+  }
+  dfsr <<- dfsr[-1,]
   df <- bind_cols(df, dfsr) 
   setwd("/Volumes/Macintosh HD/Users/jovanpoposki/Documents")
   write.xlsx(df, file="Data Frame.xlsx")
