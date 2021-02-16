@@ -5,7 +5,8 @@ library(readr)
 library(xlsx)
 library(dplyr)
 library(questionr)
-setwd("/Volumes/External SSD/Jovan sims/Jovan sims")                                     #set directory which should have your codebook handy
+library(tidyverse)
+setwd(codebookdir)                                                                       #set directory which should have your codebook handy
 chillspots <<- (read_excel("network node codebook n2.xlsx",3)[[3]])                      #extract chill spots from the codebook file
 chillspots <<- na.omit(chillspots)                                                       #omit NA's if there are any because columns in that sheet most likely have different lengths
 numagents <<- (c(read_excel("network node codebook n2.xlsx",5)[[2]]))                                                #number of agents
@@ -17,18 +18,17 @@ colnames(df) <- c(columns)
 dfsr <- data.frame(matrix(ncol = length(chillspots)))
 colnames(dfsr) <- c(chillspots)
 
-dir = "/Volumes/Macintosh HD/Users/jovanpoposki/Downloads/N10_A3" 
-setwd(dir)
-dataframe <- function(dir){
+dataframe <- function(conditiondir){
   
+  setwd(conditiondir)
   hapsfiles <<- list.files(pattern = "haps")                    #list all happiness files
   persfiles <<- list.files(pattern = "pers")                    #list all personality files
   statefiles <<- list.files(pattern = "state")                  #list all state history files
   attsfiles <<- list.files(pattern = "atts")                    #list all s/r spot attractiveness files
-  hapsfiles <<- str_sort(hapsfiles, numeric = T)
-  persfiles <<- str_sort(persfiles, numeric = T)
-  statefiles <<- str_sort(statefiles, numeric = T)
-  attsfiles <<- str_sort(attsfiles, numeric = T)
+  hapsfiles <<- str_sort(hapsfiles, decreasing = F, numeric = T)
+  persfiles <<- str_sort(persfiles, decreasing = F, numeric = T)
+  statefiles <<- str_sort(statefiles, decreasing = F, numeric = T)
+  attsfiles <<- str_sort(attsfiles, decreasing = F, numeric = T)
   
 
   for(p in 1:length(persfiles)){                            
@@ -99,6 +99,5 @@ dataframe <- function(dir){
   }
   dfsr <<- dfsr[-1,]
   df <- bind_cols(df, dfsr) 
-  setwd("/Volumes/Macintosh HD/Users/jovanpoposki/Documents")
   write.xlsx(df, file="Data Frame.xlsx")
 }
