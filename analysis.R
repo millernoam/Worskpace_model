@@ -120,7 +120,7 @@ createnetwork <<- function(numnodes,paexp,ae,ab){
 
 #### Mean depth calculation #### need graph object
 
-totalmeandepth <<- function(g){
+meanglobalintegration2 <<- function(g){
 allnodedepths <<- distances(g)
 listofdepths <<- list()
 
@@ -133,9 +133,9 @@ listofdepths <<- list()
   print(total)
 }
 
-##### Easier way to do it ######
+##### Easier and faster way to do it ######
 
-totalmeandepth2 <<- function(g){
+meanglobalintegration <<- function(g){
   nodedepths <- distances(g)
   tmd <- (sum(nodedepths))/(length(nodedepths) - length(nodedepths[1,]))
   print(tmd)
