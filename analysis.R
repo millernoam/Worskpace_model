@@ -102,10 +102,41 @@ showtimedists <-function(){
          col=c("red","blue","green","brown","orange","black"),lty=1)
 }
 
-# make new network
-#age = the number of time steps passed since the vertex is added. Vertex age is divided into aging bins
-#vconnect
+######### Network Creation #########
 
-newnetwork <- function(numnodes, vertcon, ageexp, agebins){
-  g1 <- sample_pa_age(numnodes, pa.exp=1, aging.exp=ageexp, aging.bin=agebins, m = vertcon)
+#More of any variable gives you more integration because they are all related to connecting more edges to vertices, either retroactively or proactively
+#age = the number of time steps passed since the vertex is added. Vertex age is divided into aging bins
+#I would suggest changing them all at once to the same number chosen because they play off each other. If you do change them, keep them close to each other
+#Do not go over 5% of N for the variables or else the integration caps at its minimum (1.96)
+#leave m at 1, it is the amount of edges each new node creates
+#the more integrated it is from the variables, the more rooms closer to the atrium for example, until every single room connects to just the atrium (the starting node in the network generation)
+
+createnetwork <<- function(numnodes,paexp,agingexp,agingbins){
+  network <<- sample_pa_age(numnodes, pa.exp=paexp, aging.exp=-agingexp, aging.bin=agingbins, m = 1, out.pref = T)
+  network <- as.undirected(network)
+  network <<- as_adjacency_matrix(network)
+  network <- graph_from_adjacency_matrix(network)
+  tkplot(network)
+}
+
+#### Mean depth calculation #### need graph object
+
+totalmeandepth <<- function(g){
+allnodedepths <<- distances(g)
+listofdepths <<- list()
+
+  for (n in 1:ncol(allnodedepths)){
+  nodedepth <- distances(g)[n,]    # takes the first row of the distances table (distances of nodes from the first node generated) into a temporary vector
+  meandepth <- sum(nodedepth)/(length(nodedepth)-1)  # sum all of the distances, then divide by N-1, N being number of nodes
+  listofdepths <<- append(listofdepths, meandepth)
+  }
+  total <<- mean(as.numeric(listofdepths))
+}
+
+##### Easier way to do it ######
+
+totalmeandepth2 <<- function(g){
+  nodedepths <- distances(g)
+  tmd <- (sum(nodedepths))/(length(nodedepths) - length(nodedepths[1,]))
+  print(tmd)
 }
