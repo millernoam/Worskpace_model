@@ -111,12 +111,11 @@ showtimedists <-function(){
 #leave m at 1, it is the amount of edges each new node creates
 #the more integrated it is from the variables, the more rooms closer to the atrium for example, until every single room connects to just the atrium (the starting node in the network generation)
 
-createnetwork <<- function(numnodes,paexp,agingexp,agingbins){
-  network <<- sample_pa_age(numnodes, pa.exp=paexp, aging.exp=-agingexp, aging.bin=agingbins, m = 1, out.pref = T)
+createnetwork <<- function(numnodes,paexp,ae,ab){
+  network <<- sample_pa_age(numnodes, pa.exp=paexp, aging.exp=-ae, aging.bin=ab, m = 1, out.pref = T)
   network <- as.undirected(network)
   network <<- as_adjacency_matrix(network)
   network <- graph_from_adjacency_matrix(network)
-  tkplot(network)
 }
 
 #### Mean depth calculation #### need graph object
@@ -131,6 +130,7 @@ listofdepths <<- list()
   listofdepths <<- append(listofdepths, meandepth)
   }
   total <<- mean(as.numeric(listofdepths))
+  print(total)
 }
 
 ##### Easier way to do it ######
