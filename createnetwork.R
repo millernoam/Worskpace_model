@@ -15,7 +15,7 @@ createnetwork = function(numnodes,pe,ae,ab){
 }
 
 ### Create a codebook ###
-
+library(xlsx)
 codebook = function(numnodes, numagents, time, days, alpha, attrade, pmean, psd){
 nodelist = c(1:numnodes)
 srspots = list()
